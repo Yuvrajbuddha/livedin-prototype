@@ -667,7 +667,7 @@ function HospitalPortal({ go }) {
         }}
       >
         <span>🏥 LIVEDIN | District Hospital Portal</span>
-        <span>Dr. Urmila Dwivedi (Cardiology) • {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(', ')}</span>
+        <span>Dr. Urmila Dwivedi (Cardiology)</span>
       </div>
       <div style={{ border: "1px solid #e2e8f0", borderTop: "none", borderRadius: "0 0 10px 10px", padding: 24 }}>
         <button onClick={() => go("role")} style={{ marginBottom: 16, background: "none", border: "none", color: COLORS.primary, cursor: "pointer" }}>
