@@ -302,7 +302,7 @@ function getText(language, key) {
 
 /* ---------- citizen screens ---------- */
 
-function SplashScreen({ go, language, language }) {
+function SplashScreen({ go, language }) {
   const t = (key) => getText(language, key);
   return (
     <div
@@ -488,12 +488,12 @@ function AIAssistant({ go, language }) {
       const data = await response.json();
       const text =
         data?.content?.filter((c) => c.type === "text").map((c) => c.text).join("\n") ||
-        "Sorry, I couldn't process that just now.";
+        t("assistantError");
       setMessages((m) => [...m, { role: "assistant", text }]);
     } catch (e) {
       setMessages((m) => [
         ...m,
-        { role: "assistant", text: "I'm having trouble responding right now. Please try again." },
+        { role: "assistant", text: t("assistantError") },
       ]);
     } finally {
       setLoading(false);
@@ -614,11 +614,18 @@ function UploadReport({ go, language }) {
 
 function Records({ go, language }) {
   const t = (key) => getText(language, key);
+  const records = language === "hi"
+    ? [
+        { id: 1, title: "सीबीसी ब्लड रिपोर्ट", meta: "ऐप के माध्यम से अपलोड", date: "आज" },
+        { id: 2, title: "प्रिस्क्रिप्शन जोड़ दिया गया", meta: "डॉ. शर्मा - जनरल फिजिशियन · सिटी हॉस्पिटल", date: "12 अक्टूबर" },
+        { id: 3, title: "कोविड-19 बूस्टर", meta: "जिला पीएचसी", date: "10 जनवरी" },
+      ]
+    : MOCK_RECORDS;
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
       <ScreenHeader title={t("recordsTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-        {MOCK_RECORDS.map((r) => (
+        {records.map((r) => (
           <Card key={r.id}>
             <div style={{ fontWeight: 700, fontSize: 13 }}>{r.title}</div>
             <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{r.meta}</div>
@@ -632,6 +639,12 @@ function Records({ go, language }) {
 
 function Schemes({ go, language }) {
   const t = (key) => getText(language, key);
+  const schemeData = language === "hi"
+    ? [
+        { name: "आयुष्मान भारत (PM-JAY)", eligible: true, detail: "परिवार प्रति वर्ष अधिकतम ₹5 लाख तक स्वास्थ्य कवरेज।" },
+        { name: "पीएम मातृ वंदना योजना", eligible: false, detail: "लागू नहीं (लिंग/आयु मानदंड)।" },
+      ]
+    : MOCK_SCHEMES;
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
       <ScreenHeader title={t("schemesTitle")} onBack={() => go("dashboard")} />
@@ -639,13 +652,13 @@ function Schemes({ go, language }) {
         <div style={{ fontSize: 12, color: "#475569" }}>
           {t("eligibleText")}
         </div>
-        {MOCK_SCHEMES.map((s) => (
+        {schemeData.map((s) => (
           <Card key={s.name} style={{ borderLeft: `4px solid ${s.eligible ? COLORS.accent : "#cbd5e1"}` }}>
             <div style={{ fontWeight: 700, fontSize: 13 }}>{s.name}</div>
             <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{s.detail}</div>
             {s.eligible ? (
               <div style={{ color: COLORS.primary, fontSize: 12, marginTop: 6, fontWeight: 700 }}>
-                View Details &amp; Apply
+                {t("applyText")}
               </div>
             ) : (
               <div style={{ color: "#94a3b8", fontSize: 12, marginTop: 6 }}>{t("notApplicable")}</div>
@@ -659,15 +672,22 @@ function Schemes({ go, language }) {
 
 function Timeline({ go, language }) {
   const t = (key) => getText(language, key);
+  const timelineData = language === "hi"
+    ? [
+        { when: "आज, 10:00 AM", title: "एआई रिपोर्ट अपलोड", note: "जोखिम संकेत: कम हीमोग्लोबिन" },
+        { when: "12 अक्टूबर, 2025", title: "अस्पताल विजिट", note: "सिटी केयर क्लिनिक। डॉक्टर के नोट अपडेट किए गए।" },
+        { when: "1 वर्ष पहले", title: "कोविड वैक्सीन", note: "बूस्टर खुराक दी गई।" },
+      ]
+    : MOCK_TIMELINE;
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
       <ScreenHeader title={t("timelineTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-        {MOCK_TIMELINE.map((t, i) => (
+        {timelineData.map((item, i) => (
           <Card key={i}>
-            <div style={{ fontSize: 11, color: COLORS.primary, fontWeight: 700 }}>{t.when}</div>
-            <div style={{ fontWeight: 700, fontSize: 13, marginTop: 2 }}>{t.title}</div>
-            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{t.note}</div>
+            <div style={{ fontSize: 11, color: COLORS.primary, fontWeight: 700 }}>{item.when}</div>
+            <div style={{ fontWeight: 700, fontSize: 13, marginTop: 2 }}>{item.title}</div>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{item.note}</div>
           </Card>
         ))}
       </div>
@@ -736,12 +756,22 @@ function HospitalPortal({ go }) {
   const [pin, setPin] = useState("");
   const [authed, setAuthed] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [noteText, setNoteText] = useState("");
+  const [savedNotes, setSavedNotes] = useState([]);
 
   const openPatient = (patient) => {
     setSelectedPatient(patient);
     setUid(patient.uid || MOCK_CITIZEN.uid);
     setPin("");
     setAuthed(true);
+    setNoteText("");
+    setSavedNotes([]);
+  };
+
+  const saveRecord = () => {
+    if (!noteText.trim()) return;
+    setSavedNotes((prev) => [{ text: noteText.trim(), patient: selectedPatient?.name || MOCK_CITIZEN.name }, ...prev]);
+    setNoteText("");
   };
 
   const renderPatientProfile = (patient) => (
@@ -762,8 +792,24 @@ function HospitalPortal({ go }) {
         </Card>
         <Card style={{ marginTop: 12 }}>
           <div style={{ fontWeight: 700, fontSize: 13 }}>Add Clinical Notes & Prescription</div>
-          <textarea rows={3} placeholder="Patient complains of fatigue..." style={{ width: "100%", marginTop: 8, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8 }} />
-          <PrimaryButton style={{ marginTop: 8 }}>Save Record</PrimaryButton>
+          <textarea
+            rows={3}
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            placeholder="Patient complains of fatigue..."
+            style={{ width: "100%", marginTop: 8, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8 }}
+          />
+          <PrimaryButton style={{ marginTop: 8 }} onClick={saveRecord}>Save Record</PrimaryButton>
+          {savedNotes.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 6 }}>Saved Notes</div>
+              {savedNotes.map((entry, index) => (
+                <div key={`${entry.patient}-${index}`} style={{ fontSize: 12, color: "#475569", marginTop: 4, background: "#f8fafc", padding: 6, borderRadius: 6 }}>
+                  {entry.text}
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
       <div>
@@ -881,6 +927,9 @@ function GovernmentDashboard({ go }) {
   const [selectedCitizen, setSelectedCitizen] = useState(EXTRA_PEOPLE[0]);
   const [selectedHospital, setSelectedHospital] = useState(null);
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [selectedSchemeQuestion, setSelectedSchemeQuestion] = useState(null);
+  const [schemeQuestion, setSchemeQuestion] = useState("");
+  const [schemeAnswer, setSchemeAnswer] = useState("Ask a question to receive an AI-assisted answer.");
 
   const stats = [
     {
@@ -1011,23 +1060,56 @@ function GovernmentDashboard({ go }) {
           </Card>
         )}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
-          <Card>
-            <div style={{ fontWeight: 700, fontSize: 13 }}>Disease Trend: Vector-borne (30 days)</div>
-            <svg viewBox="0 0 200 60" style={{ width: "100%", marginTop: 8 }}>
-              <polyline points="0,55 40,45 80,40 120,20 160,25 200,5" fill="none" stroke="#ef4444" strokeWidth="3" />
+          <Card style={{ background: "linear-gradient(135deg, #fff7ed, #fee2e2)" }}>
+            <div style={{ fontWeight: 800, fontSize: 13, color: COLORS.alertText }}>Disease Trend: Vector-borne (30 days)</div>
+            <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>Live outbreak pattern • rising in 3 districts</div>
+            <svg viewBox="0 0 200 60" style={{ width: "100%", marginTop: 10 }}>
+              <path d="M0,50 C20,45 35,38 50,35 C70,30 85,20 100,18 C120,15 140,8 160,12 C175,15 185,25 200,10" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
+              <circle cx="50" cy="35" r="4" fill="#ef4444" />
+              <circle cx="100" cy="18" r="4" fill="#ef4444" />
+              <circle cx="160" cy="12" r="4" fill="#ef4444" />
             </svg>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b", marginTop: 6 }}>
+              <span>Week 1</span>
+              <span>Week 2</span>
+              <span>Week 3</span>
+              <span>Week 4</span>
+            </div>
           </Card>
           <Card>
-            <div style={{ fontWeight: 700, fontSize: 13 }}>Govt Scheme Utilization (Ayushman Bharat)</div>
+            <div style={{ fontWeight: 800, fontSize: 13, color: COLORS.primary }}>Govt Scheme Utilization (Ayushman Bharat)</div>
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              {["Q1", "Q2", "Q3"].map((q, i) => (
-                <div key={q} style={{ flex: 1, background: COLORS.primary, color: "#fff", textAlign: "center", padding: "8px 0", borderRadius: 6, opacity: 0.6 + i * 0.2 }}>
-                  {q}
+              {[
+                { q: "Q1", value: "78%" },
+                { q: "Q2", value: "84%" },
+                { q: "Q3", value: "91%" },
+              ].map((item, i) => (
+                <div key={item.q} style={{ flex: 1, background: i === 2 ? COLORS.accent : COLORS.primary, color: "#fff", textAlign: "center", padding: "8px 0", borderRadius: 6 }}>
+                  <div style={{ fontSize: 10 }}>{item.q}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700 }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 12, color: "#64748b" }}>
+              <div style={{ fontWeight: 700, color: COLORS.slate }}>Common questions</div>
+              {[
+                { question: "Who is eligible for Ayushman Bharat?", answer: "Families with valid ration cards and low-income criteria are prioritized." },
+                { question: "How can hospitals claim reimbursement?", answer: "Claims are processed through the digital health wallet and verified by district officers." },
+              ].map((item) => (
+                <div key={item.question} onClick={() => { setSelectedSchemeQuestion(item); setSchemeAnswer(item.answer); }} style={{ marginTop: 8, padding: 8, borderRadius: 8, background: selectedSchemeQuestion?.question === item.question ? "#ecfeff" : "#f8fafc", cursor: "pointer" }}>
+                  <div style={{ fontWeight: 700, fontSize: 12 }}>{item.question}</div>
+                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>{item.answer}</div>
                 </div>
               ))}
             </div>
           </Card>
         </div>
+        <Card style={{ marginTop: 14 }}>
+          <div style={{ fontWeight: 800, fontSize: 13 }}>Ask any question</div>
+          <textarea value={schemeQuestion} onChange={(e) => setSchemeQuestion(e.target.value)} placeholder="Ask about eligibility, reimbursement, or district outreach..." style={{ width: "100%", marginTop: 8, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8, minHeight: 70 }} />
+          <PrimaryButton style={{ marginTop: 8 }} onClick={() => setSchemeAnswer(`AI suggestion: ${schemeQuestion || "Please enter a question."}`)}>Get AI Suggestion</PrimaryButton>
+          <div style={{ marginTop: 8, fontSize: 12, color: COLORS.primary, background: "#f8fafc", padding: 8, borderRadius: 8 }}>{schemeAnswer}</div>
+        </Card>
       </div>
     </div>
   );
