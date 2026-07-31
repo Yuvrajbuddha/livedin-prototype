@@ -757,7 +757,25 @@ function HospitalPortal({ go }) {
   const [authed, setAuthed] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [noteText, setNoteText] = useState("");
-  const [savedNotes, setSavedNotes] = useState([]);
+  const [savedNotes, setSavedNotes] = useState(() => {
+    try {
+      const stored = localStorage.getItem("livedin-hospital-notes");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const activePatientKey = selectedPatient?.uid || MOCK_CITIZEN.uid;
+  const currentSavedNotes = savedNotes[activePatientKey] || [];
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("livedin-hospital-notes", JSON.stringify(savedNotes));
+    } catch {
+      // ignore storage errors in demo mode
+    }
+  }, [savedNotes]);
 
   const openPatient = (patient) => {
     setSelectedPatient(patient);
@@ -765,13 +783,25 @@ function HospitalPortal({ go }) {
     setPin("");
     setAuthed(true);
     setNoteText("");
-    setSavedNotes([]);
   };
 
   const saveRecord = () => {
     if (!noteText.trim()) return;
-    setSavedNotes((prev) => [{ text: noteText.trim(), patient: selectedPatient?.name || MOCK_CITIZEN.name }, ...prev]);
+    setSavedNotes((prev) => ({
+      ...prev,
+      [activePatientKey]: [
+        { id: Date.now(), text: noteText.trim(), patient: selectedPatient?.name || MOCK_CITIZEN.name },
+        ...(prev[activePatientKey] || []),
+      ],
+    }));
     setNoteText("");
+  };
+
+  const removeNote = (noteId) => {
+    setSavedNotes((prev) => ({
+      ...prev,
+      [activePatientKey]: (prev[activePatientKey] || []).filter((note) => note.id !== noteId),
+    }));
   };
 
   const renderPatientProfile = (patient) => (
@@ -800,12 +830,15 @@ function HospitalPortal({ go }) {
             style={{ width: "100%", marginTop: 8, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8 }}
           />
           <PrimaryButton style={{ marginTop: 8 }} onClick={saveRecord}>Save Record</PrimaryButton>
-          {savedNotes.length > 0 && (
+          {currentSavedNotes.length > 0 && (
             <div style={{ marginTop: 10 }}>
               <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 6 }}>Saved Notes</div>
-              {savedNotes.map((entry, index) => (
-                <div key={`${entry.patient}-${index}`} style={{ fontSize: 12, color: "#475569", marginTop: 4, background: "#f8fafc", padding: 6, borderRadius: 6 }}>
-                  {entry.text}
+              {currentSavedNotes.map((entry) => (
+                <div key={entry.id} style={{ fontSize: 12, color: "#475569", marginTop: 4, background: "#f8fafc", padding: 6, borderRadius: 6, display: "flex", justifyContent: "space-between", gap: 8 }}>
+                  <span>{entry.text}</span>
+                  <button onClick={() => removeNote(entry.id)} style={{ border: "none", background: "transparent", color: COLORS.alertText, cursor: "pointer", fontSize: 12 }}>
+                    Remove
+                  </button>
                 </div>
               ))}
             </div>
