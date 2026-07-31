@@ -720,11 +720,52 @@ function HospitalPortal({ go }) {
 /* ---------- government dashboard (desktop) ---------- */
 
 function GovernmentDashboard({ go }) {
+  const [selectedMetric, setSelectedMetric] = useState("Total Citizens Registered");
+  const [selectedCitizen, setSelectedCitizen] = useState(EXTRA_PEOPLE[0]);
+  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [selectedAlert, setSelectedAlert] = useState(null);
+
   const stats = [
-    { label: "Total Citizens Registered", value: "45.2M", color: COLORS.accent },
-    { label: "Hospitals Onboarded", value: "12,450", color: COLORS.primary },
-    { label: "AI Risk Alerts Triggered", value: "842K", color: "#f59e0b" },
+    {
+      label: "Total Citizens Registered",
+      value: "45.2M",
+      color: COLORS.accent,
+      detailTitle: "Registered Citizens",
+      detailItems: EXTRA_PEOPLE.map((p) => ({
+        name: p.name,
+        meta: `Age ${p.age}`,
+      })),
+    },
+    {
+      label: "Hospitals Onboarded",
+      value: "12,450",
+      color: COLORS.primary,
+      detailTitle: "Onboarded Hospitals",
+      detailItems: [
+        { name: "City Care Hospital", meta: "Delhi • 1.2M patients" },
+        { name: "Apex Multi-Specialty", meta: "Mumbai • 980K patients" },
+        { name: "Rural Health Network", meta: "Bihar • 640K patients" },
+        { name: "Metro Cardiac Centre", meta: "Chennai • 760K patients" },
+        { name: "Sunrise Women & Child", meta: "Kolkata • 540K patients" },
+        { name: "Northstar Community Hospital", meta: "Jaipur • 420K patients" },
+        { name: "Lifeline Diagnostic Hub", meta: "Pune • 330K patients" },
+        { name: "Evergreen District Hospital", meta: "Lucknow • 290K patients" },
+      ],
+    },
+    {
+      label: "AI Risk Alerts Triggered",
+      value: "842K",
+      color: "#f59e0b",
+      detailTitle: "Recent Alerts",
+      detailItems: [
+        { name: "Heat Stress Watch", meta: "North region • 14K flagged" },
+        { name: "Diabetes Follow-up", meta: "Urban cluster • 8.3K flagged" },
+      ],
+    },
   ];
+
+  const activeMetric = stats.find((s) => s.label === selectedMetric) || stats[0];
+
   return (
     <div style={{ ...bodyFont, maxWidth: 900, margin: "0 auto" }}>
       <div style={{ background: COLORS.purple, color: "#fff", padding: "12px 20px", borderRadius: "10px 10px 0 0", display: "flex", justifyContent: "space-between" }}>
@@ -736,24 +777,78 @@ function GovernmentDashboard({ go }) {
           ← Back to role select
         </button>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-          {stats.map((s) => (
-            <Card key={s.label} style={{ borderTop: `3px solid ${s.color}` }}>
-              <div style={{ fontSize: 12, color: "#64748b" }}>{s.label}</div>
-              <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>{s.value}</div>
-            </Card>
-          ))}
+          {stats.map((s) => {
+            const isSelected = selectedMetric === s.label;
+            return (
+              <div key={s.label} onClick={() => setSelectedMetric(s.label)} style={{ cursor: "pointer" }}>
+                <Card style={{ borderTop: `3px solid ${s.color}`, border: isSelected ? `2px solid ${s.color}` : "1px solid #e2e8f0" }}>
+                  <div style={{ fontSize: 12, color: "#64748b" }}>{s.label}</div>
+                  <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4 }}>{s.value}</div>
+                </Card>
+              </div>
+            );
+          })}
         </div>
         <Card style={{ marginTop: 14 }}>
-          <div style={{ fontWeight: 700, fontSize: 13 }}>Registered Patients</div>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>{activeMetric.detailTitle}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 8 }}>
-            {EXTRA_PEOPLE.map((p) => (
-              <div key={p.name} style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 10, background: "#f8fafc" }}>
-                <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
-                <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>Age: {p.age}</div>
+            {activeMetric.detailItems.map((item) => (
+              <div
+                key={item.name}
+                onClick={() => {
+                  if (activeMetric.label === "Total Citizens Registered") {
+                    setSelectedCitizen(EXTRA_PEOPLE.find((p) => p.name === item.name) || EXTRA_PEOPLE[0]);
+                    setSelectedHospital(null);
+                  }
+                  if (activeMetric.label === "Hospitals Onboarded") {
+                    setSelectedHospital(item);
+                    setSelectedAlert(null);
+                  }
+                  if (activeMetric.label === "AI Risk Alerts Triggered") {
+                    setSelectedAlert(item);
+                  }
+                }}
+                style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 10, background: "#f8fafc", cursor: activeMetric.label === "Total Citizens Registered" || activeMetric.label === "Hospitals Onboarded" || activeMetric.label === "AI Risk Alerts Triggered" ? "pointer" : "default" }}
+              >
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{item.name}</div>
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{item.meta}</div>
               </div>
             ))}
           </div>
         </Card>
+        {activeMetric.label === "Total Citizens Registered" && (
+          <Card style={{ marginTop: 14, background: "#f8fafc" }}>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>Selected Citizen Profile</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>
+              <div style={{ fontWeight: 700 }}>{selectedCitizen.name}</div>
+              <div style={{ color: "#64748b", marginTop: 4 }}>Age: {selectedCitizen.age}</div>
+              <div style={{ color: "#64748b", marginTop: 2 }}>UID: {selectedCitizen.name === "Yuvraj Maurya" ? "LVD-2026-8942" : selectedCitizen.name === "Yash Gupta" ? "LVD-2026-8943" : "LVD-2026-8944"}</div>
+              <div style={{ color: "#64748b", marginTop: 2 }}>Status: Active in national health registry</div>
+            </div>
+          </Card>
+        )}
+        {activeMetric.label === "Hospitals Onboarded" && selectedHospital && (
+          <Card style={{ marginTop: 14, background: "#f8fafc" }}>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>Selected Hospital Profile</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>
+              <div style={{ fontWeight: 700 }}>{selectedHospital.name}</div>
+              <div style={{ color: "#64748b", marginTop: 4 }}>{selectedHospital.meta}</div>
+              <div style={{ color: "#64748b", marginTop: 2 }}>Status: Live on national health network</div>
+              <div style={{ color: "#64748b", marginTop: 2 }}>Interoperability: ICD-10 / HL7 enabled</div>
+            </div>
+          </Card>
+        )}
+        {activeMetric.label === "AI Risk Alerts Triggered" && selectedAlert && (
+          <Card style={{ marginTop: 14, background: "#f8fafc" }}>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>Selected Alert Insight</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>
+              <div style={{ fontWeight: 700 }}>{selectedAlert.name}</div>
+              <div style={{ color: "#64748b", marginTop: 4 }}>{selectedAlert.meta}</div>
+              <div style={{ color: "#64748b", marginTop: 2 }}>Priority: High</div>
+              <div style={{ color: "#64748b", marginTop: 2 }}>Recommended action: Dispatch mobile screening team</div>
+            </div>
+          </Card>
+        )}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
           <Card>
             <div style={{ fontWeight: 700, fontSize: 13 }}>Disease Trend: Vector-borne (30 days)</div>
