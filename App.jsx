@@ -578,6 +578,14 @@ function HospitalPortal({ go }) {
   const [uid, setUid] = useState(MOCK_CITIZEN.uid);
   const [pin, setPin] = useState("");
   const [authed, setAuthed] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  const openPatient = (patient) => {
+    setSelectedPatient(patient);
+    setUid(patient.uid || MOCK_CITIZEN.uid);
+    setPin("");
+    setAuthed(true);
+  };
 
   return (
     <div style={{ ...bodyFont, maxWidth: 900, margin: "0 auto" }}>
@@ -605,9 +613,15 @@ function HospitalPortal({ go }) {
             <p style={{ fontSize: 13, color: "#64748b" }}>Enter patient details to access lifecycle medical records.</p>
             <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
               {EXTRA_PEOPLE.map((person) => (
-                <Card key={person.name} style={{ fontSize: 13, fontWeight: 600, color: COLORS.slate }}>
-                  {person.name} • Age {person.age}
-                </Card>
+                <div
+                  key={person.name}
+                  onClick={() => openPatient({ ...person, uid: `${person.name.toLowerCase().replace(/\s+/g, "-")}-uid` })}
+                  style={{ cursor: "pointer" }}
+                >
+                  <Card style={{ fontSize: 13, fontWeight: 600, color: COLORS.slate }}>
+                    {person.name} • Age {person.age}
+                  </Card>
+                </div>
               ))}
             </div>
             <input value={uid} onChange={(e) => setUid(e.target.value)} style={{ width: "100%", padding: 10, marginTop: 8, border: "1px solid #cbd5e1", borderRadius: 8 }} />
