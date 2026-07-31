@@ -162,9 +162,148 @@ function Card({ children, style, onClick }) {
 
 const bodyFont = { fontFamily: "'Segoe UI', Arial, sans-serif" };
 
+const translations = {
+  en: {
+    getStarted: "Get Started →",
+    splashSubtitle: "One Health Identity. Lifetime Care.",
+    selectRole: "Select Your Role",
+    citizen: "Citizen",
+    citizenDesc: "Access records, AI assistant & schemes",
+    hospital: "Hospital",
+    hospitalDesc: "Manage patients & update records",
+    government: "Government",
+    governmentDesc: "Analytics & public health monitoring",
+    citizenLogin: "Citizen Login",
+    healthUid: "Health UID",
+    healthPin: "Health PIN",
+    loginSecurely: "Login securely",
+    voiceLogin: "🎤 Login with Voice",
+    incorrectPin: "Incorrect PIN. Try 4821 for this demo.",
+    home: "Home · 🔔 2",
+    healthScore: "Health Score",
+    goodStanding: "Good standing. 1 test due.",
+    aiAdvice: "Today's AI Advice",
+    vaccinations: "Upcoming Vaccinations",
+    vaccinationNote: "Covid Booster — Overdue by 2 weeks.",
+    aiAdviceNote: "Take Paracetamol at 2:00 PM after lunch. Keep hydrated.",
+    aiAssistant: "AI Assistant",
+    uploadReport: "Upload Report",
+    myRecords: "My Records",
+    govtSchemes: "Govt Schemes",
+    healthTimeline: "Health Timeline",
+    emergencyQr: "Emergency QR",
+    profile: "Profile",
+    assistantTitle: "AI Assistant (हिंदी / Eng)",
+    assistantIntro: "Hello! I am your LIVEDIN assistant. How can I help you today?",
+    assistantError: "I'm having trouble responding right now. Please try again.",
+    assistantTyping: "Assistant is typing…",
+    assistantPlaceholder: "Type message...",
+    send: "Send",
+    uploadTitle: "Upload Document",
+    uploadAreaTitle: "Take Photo or Upload PDF",
+    uploadAreaSubtitle: "Supports Blood Reports, X-Ray, Prescriptions",
+    processing: "Processing… OCR extracting text...",
+    riskIndicator: "Risk Indicator: Abnormal Values Found",
+    extractedHighlights: "Extracted Highlights",
+    aiRecommendation: "AI Recommendation",
+    updateTimeline: "Update Health Timeline",
+    recordsTitle: "My Records",
+    schemesTitle: "Govt Schemes",
+    eligibleText: "✓ AI Analysis: Based on your profile (Farmer, Income < ₹2L), you are eligible for 1 scheme.",
+    applyText: "View Details & Apply",
+    notApplicable: "Not applicable",
+    timelineTitle: "Health Timeline",
+    emergencyTitle: "Emergency Card",
+    emergencyUid: "UID",
+    emergencyBlood: "Blood Group",
+    emergencyAllergies: "Allergies",
+    emergencyCondition: "Condition",
+    emergencyContact: "Contact",
+    emergencyNote: "Scan grants emergency info only — full records stay PIN-protected.",
+    profileTitle: "Profile",
+    relatedPatients: "Related patients",
+    updateMedicalInfo: "Update Medical Info",
+    changePin: "Change Health PIN",
+    languageOption: "Language / भाषा (Hindi)",
+    languageOptionHi: "भाषा / Language (English)",
+    profileName: "Profile",
+  },
+  hi: {
+    getStarted: "शुरू करें →",
+    splashSubtitle: "वन हेल्थ पहचान। जीवन भर की देखभाल।",
+    selectRole: "अपना रोल चुनें",
+    citizen: "नागरिक",
+    citizenDesc: "रिकॉर्ड, एआई सहायक और योजनाएँ देखें",
+    hospital: "अस्पताल",
+    hospitalDesc: "रोगियों का प्रबंधन और रिकॉर्ड अपडेट करें",
+    government: "सरकार",
+    governmentDesc: "विश्लेषण और सार्वजनिक स्वास्थ्य निगरानी",
+    citizenLogin: "नागरिक लॉगिन",
+    healthUid: "स्वास्थ्य UID",
+    healthPin: "स्वास्थ्य PIN",
+    loginSecurely: "सुरक्षित रूप से लॉगिन करें",
+    voiceLogin: "🎤 आवाज से लॉगिन",
+    incorrectPin: "गलता PIN। इस डेमो के लिए 4821 आज़माएं।",
+    home: "होम · 🔔 2",
+    healthScore: "स्वास्थ्य स्कोर",
+    goodStanding: "अच्छी स्थिति। 1 टेस्ट बाकी है।",
+    aiAdvice: "आज की एआई सलाह",
+    vaccinations: "आगामी टीकाकरण",
+    vaccinationNote: "कोविड बूस्टर — 2 हफ्ते से देरी।",
+    aiAdviceNote: "दोपहर 2:00 बजे पैरासिटामोल लें। हाइड्रेट रहें।",
+    aiAssistant: "एआई सहायक",
+    uploadReport: "रिपोर्ट अपलोड करें",
+    myRecords: "मेरे रिकॉर्ड",
+    govtSchemes: "सरकारी योजनाएँ",
+    healthTimeline: "स्वास्थ्य टाइमलाइन",
+    emergencyQr: "आपातकालीन QR",
+    profile: "प्रोफ़ाइल",
+    assistantTitle: "एआई सहायक (हिंदी / Eng)",
+    assistantIntro: "नमस्ते! मैं आपका LIVEDIN सहायक हूँ। आज मैं आपकी कैसे मदद कर सकता हूँ?",
+    assistantError: "मैं अभी जवाब देने में समस्या महसूस कर रहा हूँ। कृपया फिर से कोशिश करें।",
+    assistantTyping: "सहायक टाइप कर रहा है…",
+    assistantPlaceholder: "संदेश लिखें...",
+    send: "भेजें",
+    uploadTitle: "दस्तावेज अपलोड करें",
+    uploadAreaTitle: "फोटो लें या PDF अपलोड करें",
+    uploadAreaSubtitle: "ब्लड रिपोर्ट, X-Ray, पर्ची समर्थित",
+    processing: "प्रोसेसिंग… OCR टेक्स्ट निकाल रहा है...",
+    riskIndicator: "जोखिम संकेतक: असामान्य मान मिले",
+    extractedHighlights: "निकाले गए मुख्य बिंदु",
+    aiRecommendation: "एआई सिफ़ारिश",
+    updateTimeline: "स्वास्थ्य टाइमलाइन अपडेट करें",
+    recordsTitle: "मेरे रिकॉर्ड",
+    schemesTitle: "सरकारी योजनाएँ",
+    eligibleText: "✓ एआई विश्लेषण: आपकी प्रोफ़ाइल (किसान, आय < ₹2L) के आधार पर आप 1 योजना के लिए पात्र हैं।",
+    applyText: "विवरण देखें और आवेदन करें",
+    notApplicable: "लागू नहीं",
+    timelineTitle: "स्वास्थ्य टाइमलाइन",
+    emergencyTitle: "आपातकालीन कार्ड",
+    emergencyUid: "UID",
+    emergencyBlood: "रक्त समूह",
+    emergencyAllergies: "एलर्जी",
+    emergencyCondition: "स्थिति",
+    emergencyContact: "संपर्क",
+    emergencyNote: "स्कैन केवल आपातकालीन जानकारी देता है — पूरे रिकॉर्ड PIN-से सुरक्षित रहते हैं।",
+    profileTitle: "प्रोफ़ाइल",
+    relatedPatients: "संबंधित रोगी",
+    updateMedicalInfo: "मेडिकल जानकारी अपडेट करें",
+    changePin: "स्वास्थ्य PIN बदलें",
+    languageOption: "भाषा / Language (English)",
+    languageOptionHi: "Language / भाषा (Hindi)",
+    profileName: "प्रोफ़ाइल",
+  },
+};
+
+function getText(language, key) {
+  const lang = language === "hi" ? "hi" : "en";
+  return translations[lang][key] || translations.en[key];
+}
+
 /* ---------- citizen screens ---------- */
 
-function SplashScreen({ go }) {
+function SplashScreen({ go, language, language }) {
+  const t = (key) => getText(language, key);
   return (
     <div
       style={{
@@ -188,23 +327,24 @@ function SplashScreen({ go }) {
       />
       <div style={{ fontWeight: 800, fontSize: 24, color: COLORS.slate }}>LIVEDIN</div>
       <div style={{ color: "#64748b", textAlign: "center", fontSize: 13 }}>
-        One Health Identity. Lifetime Care.
+        {t("splashSubtitle")}
       </div>
       <div style={{ flex: 1 }} />
-      <PrimaryButton onClick={() => go("role")}>Get Started →</PrimaryButton>
+      <PrimaryButton onClick={() => go("role")}>{t("getStarted")}</PrimaryButton>
     </div>
   );
 }
 
-function RoleSelect({ go }) {
+function RoleSelect({ go, language }) {
+  const t = (key) => getText(language, key);
   const roles = [
-    { id: "citizenLogin", color: COLORS.primary, icon: "👤", title: "Citizen", desc: "Access records, AI assistant & schemes" },
-    { id: "hospital", color: COLORS.accent, icon: "🏥", title: "Hospital", desc: "Manage patients & update records" },
-    { id: "government", color: COLORS.purple, icon: "🏛", title: "Government", desc: "Analytics & public health monitoring" },
+    { id: "citizenLogin", color: COLORS.primary, icon: "👤", title: t("citizen"), desc: t("citizenDesc") },
+    { id: "hospital", color: COLORS.accent, icon: "🏥", title: t("hospital"), desc: t("hospitalDesc") },
+    { id: "government", color: COLORS.purple, icon: "🏛", title: t("government"), desc: t("governmentDesc") },
   ];
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="Select Your Role" onBack={() => go("splash")} />
+      <ScreenHeader title={t("selectRole")} onBack={() => go("splash")} />
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
         {roles.map((r) => (
           <Card key={r.id} onClick={() => go(r.id)} style={{ borderLeft: `4px solid ${r.color}` }}>
@@ -217,31 +357,32 @@ function RoleSelect({ go }) {
   );
 }
 
-function CitizenLogin({ go }) {
+function CitizenLogin({ go, language }) {
   const [uid, setUid] = useState(MOCK_CITIZEN.uid);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const t = (key) => getText(language, key);
 
   const submit = () => {
     if (pin === MOCK_CITIZEN.pin) {
       setError("");
       go("dashboard");
     } else {
-      setError("Incorrect PIN. Try 4821 for this demo.");
+      setError(t("incorrectPin"));
     }
   };
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="Citizen Login" onBack={() => go("role")} />
+      <ScreenHeader title={t("citizenLogin")} onBack={() => go("role")} />
       <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-        <label style={{ fontSize: 12, color: "#64748b" }}>Health UID</label>
+        <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthUid")}</label>
         <input
           value={uid}
           onChange={(e) => setUid(e.target.value)}
           style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
         />
-        <label style={{ fontSize: 12, color: "#64748b" }}>Health PIN</label>
+        <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthPin")}</label>
         <input
           type="password"
           maxLength={6}
@@ -251,26 +392,27 @@ function CitizenLogin({ go }) {
           style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
         />
         {error && <div style={{ color: COLORS.alertText, fontSize: 12 }}>{error}</div>}
-        <PrimaryButton onClick={submit}>Login securely</PrimaryButton>
-        <div style={{ textAlign: "center", fontSize: 12, color: COLORS.primary }}>🎤 Login with Voice</div>
+        <PrimaryButton onClick={submit}>{t("loginSecurely")}</PrimaryButton>
+        <div style={{ textAlign: "center", fontSize: 12, color: COLORS.primary }}>{t("voiceLogin")}</div>
       </div>
     </div>
   );
 }
 
-function Dashboard({ go }) {
+function Dashboard({ go, language }) {
+  const t = (key) => getText(language, key);
   const items = [
-    { id: "assistant", label: "AI Assistant" },
-    { id: "upload", label: "Upload Report" },
-    { id: "records", label: "My Records" },
-    { id: "schemes", label: "Govt Schemes" },
-    { id: "timeline", label: "Health Timeline" },
-    { id: "emergency", label: "Emergency QR" },
-    { id: "profile", label: "Profile" },
+    { id: "assistant", label: t("aiAssistant") },
+    { id: "upload", label: t("uploadReport") },
+    { id: "records", label: t("myRecords") },
+    { id: "schemes", label: t("govtSchemes") },
+    { id: "timeline", label: t("healthTimeline") },
+    { id: "emergency", label: t("emergencyQr") },
+    { id: "profile", label: t("profile") },
   ];
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont, overflowY: "auto" }}>
-      <ScreenHeader title="Home · 🔔 2" onBack={() => go("role")} />
+      <ScreenHeader title={t("home")} onBack={() => go("role")} />
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
         <div
           style={{
@@ -280,9 +422,9 @@ function Dashboard({ go }) {
             padding: 16,
           }}
         >
-          <div style={{ fontSize: 12, opacity: 0.85 }}>Health Score</div>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>{t("healthScore")}</div>
           <div style={{ fontSize: 32, fontWeight: 800 }}>{MOCK_CITIZEN.healthScore}/100</div>
-          <div style={{ fontSize: 12 }}>Good standing. 1 test due.</div>
+          <div style={{ fontSize: 12 }}>{t("goodStanding")}</div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -294,23 +436,24 @@ function Dashboard({ go }) {
         </div>
 
         <Card>
-          <div style={{ fontWeight: 700, color: COLORS.primary, fontSize: 13 }}>Today's AI Advice</div>
+          <div style={{ fontWeight: 700, color: COLORS.primary, fontSize: 13 }}>{t("aiAdvice")}</div>
           <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>
-            Take Paracetamol at 2:00 PM after lunch. Keep hydrated.
+            {t("aiAdviceNote")}
           </div>
         </Card>
         <Card>
-          <div style={{ fontWeight: 700, fontSize: 13 }}>Upcoming Vaccinations</div>
-          <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Covid Booster — Overdue by 2 weeks.</div>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>{t("vaccinations")}</div>
+          <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>{t("vaccinationNote")}</div>
         </Card>
       </div>
     </div>
   );
 }
 
-function AIAssistant({ go }) {
+function AIAssistant({ go, language }) {
+  const t = (key) => getText(language, key);
   const [messages, setMessages] = useState([
-    { role: "assistant", text: "Hello! I am your LIVEDIN assistant. How can I help you today?" },
+    { role: "assistant", text: t("assistantIntro") },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -359,7 +502,7 @@ function AIAssistant({ go }) {
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="AI Assistant (हिंदी / Eng)" onBack={() => go("dashboard")} />
+      <ScreenHeader title={t("assistantTitle")} onBack={() => go("dashboard")} />
       <div style={{ flex: 1, overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
         {messages.map((m, i) => (
           <div
@@ -378,7 +521,7 @@ function AIAssistant({ go }) {
             {m.text}
           </div>
         ))}
-        {loading && <div style={{ fontSize: 12, color: "#94a3b8" }}>Assistant is typing…</div>}
+        {loading && <div style={{ fontSize: 12, color: "#94a3b8" }}>{t("assistantTyping")}</div>}
         <div ref={endRef} />
       </div>
       <div style={{ padding: 10, borderTop: "1px solid #e2e8f0", display: "flex", gap: 8 }}>
@@ -386,7 +529,7 @@ function AIAssistant({ go }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder="Type message..."
+          placeholder={t("assistantPlaceholder")}
           style={{ flex: 1, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8, fontSize: 13 }}
         />
         <button
@@ -400,14 +543,15 @@ function AIAssistant({ go }) {
             cursor: "pointer",
           }}
         >
-          Send
+          {t("send")}
         </button>
       </div>
     </div>
   );
 }
 
-function UploadReport({ go }) {
+function UploadReport({ go, language }) {
+  const t = (key) => getText(language, key);
   const [stage, setStage] = useState("idle");
 
   const startUpload = () => {
@@ -417,7 +561,7 @@ function UploadReport({ go }) {
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="Upload Document" onBack={() => go("dashboard")} />
+      <ScreenHeader title={t("uploadTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 20 }}>
         {stage !== "done" && (
           <div
@@ -431,29 +575,29 @@ function UploadReport({ go }) {
             }}
           >
             <div style={{ fontSize: 30 }}>📷</div>
-            <div style={{ fontWeight: 700, marginTop: 8 }}>Take Photo or Upload PDF</div>
+            <div style={{ fontWeight: 700, marginTop: 8 }}>{t("uploadAreaTitle")}</div>
             <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
-              Supports Blood Reports, X-Ray, Prescriptions
+              {t("uploadAreaSubtitle")}
             </div>
           </div>
         )}
         {stage === "processing" && (
           <div style={{ marginTop: 16, fontSize: 13, color: "#64748b" }}>
-            Processing… OCR extracting text...
+            {t("processing")}
           </div>
         )}
         {stage === "done" && (
           <div>
             <div style={{ background: COLORS.alert, color: COLORS.alertText, borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 700 }}>
-              Risk Indicator: Abnormal Values Found
+              {t("riskIndicator")}
             </div>
             <Card style={{ marginTop: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 13 }}>Extracted Highlights</div>
+              <div style={{ fontWeight: 700, fontSize: 13 }}>{t("extractedHighlights")}</div>
               <div style={{ fontSize: 12, marginTop: 6 }}>• Hemoglobin: 9.2 g/dL (Low)</div>
               <div style={{ fontSize: 12 }}>• WBC Count: 7,500 (Normal)</div>
             </Card>
             <Card style={{ marginTop: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.accent }}>AI Recommendation</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.accent }}>{t("aiRecommendation")}</div>
               <div style={{ fontSize: 12, marginTop: 6 }}>
                 May indicate anemia. Suggested tests: Iron Profile, Vitamin B12. Please consult a doctor.
               </div>
@@ -468,10 +612,11 @@ function UploadReport({ go }) {
   );
 }
 
-function Records({ go }) {
+function Records({ go, language }) {
+  const t = (key) => getText(language, key);
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="My Records" onBack={() => go("dashboard")} />
+      <ScreenHeader title={t("recordsTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
         {MOCK_RECORDS.map((r) => (
           <Card key={r.id}>
@@ -485,13 +630,14 @@ function Records({ go }) {
   );
 }
 
-function Schemes({ go }) {
+function Schemes({ go, language }) {
+  const t = (key) => getText(language, key);
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="Govt Schemes" onBack={() => go("dashboard")} />
+      <ScreenHeader title={t("schemesTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ fontSize: 12, color: "#475569" }}>
-          ✓ AI Analysis: Based on your profile (Farmer, Income &lt; ₹2L), you are eligible for 1 scheme.
+          {t("eligibleText")}
         </div>
         {MOCK_SCHEMES.map((s) => (
           <Card key={s.name} style={{ borderLeft: `4px solid ${s.eligible ? COLORS.accent : "#cbd5e1"}` }}>
@@ -502,7 +648,7 @@ function Schemes({ go }) {
                 View Details &amp; Apply
               </div>
             ) : (
-              <div style={{ color: "#94a3b8", fontSize: 12, marginTop: 6 }}>Not applicable</div>
+              <div style={{ color: "#94a3b8", fontSize: 12, marginTop: 6 }}>{t("notApplicable")}</div>
             )}
           </Card>
         ))}
@@ -511,10 +657,11 @@ function Schemes({ go }) {
   );
 }
 
-function Timeline({ go }) {
+function Timeline({ go, language }) {
+  const t = (key) => getText(language, key);
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="Health Timeline" onBack={() => go("dashboard")} />
+      <ScreenHeader title={t("timelineTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
         {MOCK_TIMELINE.map((t, i) => (
           <Card key={i}>
@@ -528,42 +675,52 @@ function Timeline({ go }) {
   );
 }
 
-function EmergencyQR({ go }) {
+function EmergencyQR({ go, language }) {
+  const t = (key) => getText(language, key);
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="Emergency Card" onBack={() => go("dashboard")} />
+      <ScreenHeader title={t("emergencyTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 20 }}>
         <div style={{ background: COLORS.slate, color: "#fff", borderRadius: 14, padding: 18 }}>
-          <div style={{ fontWeight: 800, fontSize: 14, letterSpacing: 1 }}>MEDICAL EMERGENCY CARD</div>
+          <div style={{ fontWeight: 800, fontSize: 14, letterSpacing: 1 }}>{t("emergencyTitle").toUpperCase()}</div>
           <div style={{ marginTop: 12, fontSize: 12, lineHeight: 1.8 }}>
-            <div>UID: {MOCK_CITIZEN.uid}</div>
-            <div>Blood Group: {MOCK_CITIZEN.bloodGroup}</div>
-            <div>Allergies: {MOCK_CITIZEN.allergies.join(", ")}</div>
-            <div>Condition: {MOCK_CITIZEN.condition}</div>
-            <div>Contact: {MOCK_CITIZEN.emergencyContact}</div>
+            <div>{t("emergencyUid")}: {MOCK_CITIZEN.uid}</div>
+            <div>{t("emergencyBlood")}: {MOCK_CITIZEN.bloodGroup}</div>
+            <div>{t("emergencyAllergies")}: {MOCK_CITIZEN.allergies.join(", ")}</div>
+            <div>{t("emergencyCondition")}: {MOCK_CITIZEN.condition}</div>
+            <div>{t("emergencyContact")}: {MOCK_CITIZEN.emergencyContact}</div>
           </div>
         </div>
         <div style={{ textAlign: "center", marginTop: 16, fontSize: 60 }}>▦</div>
         <div style={{ textAlign: "center", fontSize: 11, color: "#94a3b8" }}>
-          Scan grants emergency info only — full records stay PIN-protected.
+          {t("emergencyNote")}
         </div>
       </div>
     </div>
   );
 }
 
-function Profile({ go }) {
+function Profile({ go, language, onLanguageToggle }) {
+  const t = (key) => getText(language, key);
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
-      <ScreenHeader title="Profile" onBack={() => go("dashboard")} />
+      <ScreenHeader title={t("profileTitle")} onBack={() => go("dashboard")} />
       <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ fontWeight: 800, fontSize: 16 }}>{MOCK_CITIZEN.name}</div>
         <div style={{ fontSize: 12, color: "#64748b" }}>UID: {MOCK_CITIZEN.uid}</div>
         <div style={{ fontSize: 12, color: COLORS.primary, marginTop: 4, fontWeight: 700 }}>
-          Related patients: {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(" • ")}
+          {t("relatedPatients")}: {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(" • ")}
         </div>
-        {["Update Medical Info", "Change Health PIN", "Language / भाषा (Hindi)"].map((row) => (
-          <Card key={row} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 600 }}>
+        {[t("updateMedicalInfo"), t("changePin"), language === "hi" ? t("languageOptionHi") : t("languageOption")].map((row, index) => (
+          <Card
+            key={row}
+            onClick={() => {
+              if (index === 2) {
+                onLanguageToggle();
+              }
+            }}
+            style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 600, cursor: index === 2 ? "pointer" : "default" }}
+          >
             <span>{row}</span> <span>›</span>
           </Card>
         ))}
@@ -894,7 +1051,12 @@ const CITIZEN_SCREENS = {
 
 export default function LivedinPrototype() {
   const [screen, setScreen] = useState("splash");
+  const [language, setLanguage] = useState("en");
   const go = (s) => setScreen(s);
+
+  const handleLanguageToggle = () => {
+    setLanguage((prev) => (prev === "en" ? "hi" : "en"));
+  };
 
   if (screen === "hospital") {
     return (
@@ -915,7 +1077,7 @@ export default function LivedinPrototype() {
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", padding: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
       <PhoneFrame>
-        <Screen go={go} />
+        <Screen go={go} language={language} onLanguageToggle={handleLanguageToggle} />
       </PhoneFrame>
       <div style={{ fontSize: 11, color: "#94a3b8", ...bodyFont }}>
         LIVEDIN Prototype · Demo data only · AI never diagnoses
