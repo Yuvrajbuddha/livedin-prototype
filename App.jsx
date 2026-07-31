@@ -591,7 +591,7 @@ function HospitalPortal({ go }) {
         }}
       >
         <span>🏥 LIVEDIN | District Hospital Portal</span>
-        <span>Dr. Sharma (Cardiology) • {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(', ')}</span>
+        <span>Dr. Urmila Dwivedi (Cardiology) • {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(', ')}</span>
       </div>
       <div style={{ border: "1px solid #e2e8f0", borderTop: "none", borderRadius: "0 0 10px 10px", padding: 24 }}>
         <button onClick={() => go("role")} style={{ marginBottom: 16, background: "none", border: "none", color: COLORS.primary, cursor: "pointer" }}>
@@ -700,8 +700,13 @@ function GovernmentDashboard({ go }) {
         </div>
         <Card style={{ marginTop: 14 }}>
           <div style={{ fontWeight: 700, fontSize: 13 }}>Registered Patients</div>
-          <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
-            {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(" • ")}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 8 }}>
+            {EXTRA_PEOPLE.map((p) => (
+              <div key={p.name} style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 10, background: "#f8fafc" }}>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>Age: {p.age}</div>
+              </div>
+            ))}
           </div>
         </Card>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
