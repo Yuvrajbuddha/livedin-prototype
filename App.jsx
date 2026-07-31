@@ -760,6 +760,10 @@ function GovernmentDashboard({ go }) {
       detailItems: [
         { name: "Heat Stress Watch", meta: "North region • 14K flagged" },
         { name: "Diabetes Follow-up", meta: "Urban cluster • 8.3K flagged" },
+        { name: "Respiratory Infection Surge", meta: "Coastal belt • 6.8K flagged" },
+        { name: "Maternal Nutrition Risk", meta: "Central districts • 4.2K flagged" },
+        { name: "Medication Adherence Drop", meta: "Western corridor • 3.6K flagged" },
+        { name: "Waterborne Illness Cluster", meta: "River belt • 2.9K flagged" },
       ],
     },
   ];
