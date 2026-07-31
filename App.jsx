@@ -32,6 +32,7 @@ const MOCK_CITIZEN = {
 };
 
 const EXTRA_PEOPLE = [
+  { name: "Yuvraj Buddha", age: 19 },
   { name: "Yash Gupta", age: 19 },
   { name: "Swapnil Tripathi", age: 22 },
 ];
