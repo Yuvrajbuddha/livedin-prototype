@@ -23,7 +23,7 @@ const MOCK_CITIZEN = {
   name: "Yuvraj Maurya",
   uid: "LVD-2026-8942",
   pin: "4821",
-  age: 45,
+  age: 19,
   bloodGroup: "O+",
   allergies: ["Penicillin", "Peanuts"],
   condition: "Type 2 Diabetes",
@@ -32,8 +32,8 @@ const MOCK_CITIZEN = {
 };
 
 const EXTRA_PEOPLE = [
-  "Yash Gupta",
-  "Swapnil Tripathi",
+  { name: "Yash Gupta", age: 19 },
+  { name: "Swapnil Tripathi", age: 22 },
 ];
 
 const MOCK_RECORDS = [
@@ -559,7 +559,7 @@ function Profile({ go }) {
         <div style={{ fontWeight: 800, fontSize: 16 }}>{MOCK_CITIZEN.name}</div>
         <div style={{ fontSize: 12, color: "#64748b" }}>UID: {MOCK_CITIZEN.uid}</div>
         <div style={{ fontSize: 12, color: COLORS.primary, marginTop: 4, fontWeight: 700 }}>
-          Related patients: {EXTRA_PEOPLE.join(" • ")}
+          Related patients: {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(" • ")}
         </div>
         {["Update Medical Info", "Change Health PIN", "Language / भाषा (Hindi)"].map((row) => (
           <Card key={row} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 600 }}>
@@ -591,7 +591,7 @@ function HospitalPortal({ go }) {
         }}
       >
         <span>🏥 LIVEDIN | District Hospital Portal</span>
-        <span>Dr. Sharma (Cardiology) • {EXTRA_PEOPLE.join(', ')}</span>
+        <span>Dr. Sharma (Cardiology) • {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(', ')}</span>
       </div>
       <div style={{ border: "1px solid #e2e8f0", borderTop: "none", borderRadius: "0 0 10px 10px", padding: 24 }}>
         <button onClick={() => go("role")} style={{ marginBottom: 16, background: "none", border: "none", color: COLORS.primary, cursor: "pointer" }}>
@@ -603,9 +603,9 @@ function HospitalPortal({ go }) {
             <h3 style={{ color: COLORS.primary }}>Patient Authorization</h3>
             <p style={{ fontSize: 13, color: "#64748b" }}>Enter patient details to access lifecycle medical records.</p>
             <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-              {EXTRA_PEOPLE.map((name) => (
-                <Card key={name} style={{ fontSize: 13, fontWeight: 600, color: COLORS.slate }}>
-                  {name}
+              {EXTRA_PEOPLE.map((person) => (
+                <Card key={person.name} style={{ fontSize: 13, fontWeight: 600, color: COLORS.slate }}>
+                  {person.name} • Age {person.age}
                 </Card>
               ))}
             </div>
@@ -701,7 +701,7 @@ function GovernmentDashboard({ go }) {
         <Card style={{ marginTop: 14 }}>
           <div style={{ fontWeight: 700, fontSize: 13 }}>Registered Patients</div>
           <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>
-            {EXTRA_PEOPLE.join(" • ")}
+            {EXTRA_PEOPLE.map((p) => `${p.name} (${p.age})`).join(" • ")}
           </div>
         </Card>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
