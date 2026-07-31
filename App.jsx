@@ -32,7 +32,7 @@ const MOCK_CITIZEN = {
 };
 
 const EXTRA_PEOPLE = [
-  { name: "Yuvraj Buddha", age: 19 },
+  { name: "Yuvraj Maurya", age: 19 },
   { name: "Yash Gupta", age: 19 },
   { name: "Swapnil Tripathi", age: 22 },
 ];
@@ -587,6 +587,73 @@ function HospitalPortal({ go }) {
     setAuthed(true);
   };
 
+  const renderPatientProfile = (patient) => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div>
+        <h3>{patient.name}</h3>
+        <div style={{ fontSize: 12, color: "#64748b" }}>
+          Age: {patient.age} | {patient.bloodGroup}
+        </div>
+        <Card style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>Clinical Summary</div>
+          <div style={{ fontSize: 12, marginTop: 6 }}>
+            Condition: {patient.condition}
+          </div>
+          <div style={{ fontSize: 12, marginTop: 6 }}>
+            Emergency Contact: {patient.emergencyContact}
+          </div>
+        </Card>
+        <Card style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>Add Clinical Notes & Prescription</div>
+          <textarea rows={3} placeholder="Patient complains of fatigue..." style={{ width: "100%", marginTop: 8, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8 }} />
+          <PrimaryButton style={{ marginTop: 8 }}>Save Record</PrimaryButton>
+        </Card>
+      </div>
+      <div>
+        <Card style={{ background: "#ecfdf5" }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.accent }}>AI Recommendations for Doctor</div>
+          <ul style={{ fontSize: 12, marginTop: 6, paddingLeft: 18 }}>
+            <li>Suggested Test: Iron Profile</li>
+            <li>Suggested Test: Vitamin B12</li>
+            <li>Trend: Latest vitals stable.</li>
+          </ul>
+        </Card>
+        <Card style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>Patient Timeline</div>
+          {MOCK_TIMELINE.map((t, i) => (
+            <div key={i} style={{ fontSize: 12, marginTop: 6 }}>
+              <b>{t.when}:</b> {t.title}
+            </div>
+          ))}
+        </Card>
+      </div>
+    </div>
+  );
+
+  const patientProfiles = {
+    [MOCK_CITIZEN.name]: {
+      name: MOCK_CITIZEN.name,
+      age: MOCK_CITIZEN.age,
+      uid: MOCK_CITIZEN.uid,
+      bloodGroup: MOCK_CITIZEN.bloodGroup,
+      condition: MOCK_CITIZEN.condition,
+      emergencyContact: MOCK_CITIZEN.emergencyContact,
+    },
+    ...Object.fromEntries(
+      EXTRA_PEOPLE.map((person) => [
+        person.name,
+        {
+          name: person.name,
+          age: person.age,
+          uid: `${person.name.toLowerCase().replace(/\s+/g, "-")}-uid`,
+          bloodGroup: person.name === "Yash Gupta" ? "A+" : "B+",
+          condition: person.name === "Yash Gupta" ? "Asthma" : "Hypertension",
+          emergencyContact: person.name === "Yash Gupta" ? "+91-9876543211 (Mother)" : "+91-9876543212 (Sibling)",
+        },
+      ])
+    ),
+  };
+
   return (
     <div style={{ ...bodyFont, maxWidth: 900, margin: "0 auto" }}>
       <div
@@ -615,7 +682,7 @@ function HospitalPortal({ go }) {
               {EXTRA_PEOPLE.map((person) => (
                 <div
                   key={person.name}
-                  onClick={() => openPatient({ ...person, uid: `${person.name.toLowerCase().replace(/\s+/g, "-")}-uid` })}
+                  onClick={() => openPatient(patientProfiles[person.name])}
                   style={{ cursor: "pointer" }}
                 >
                   <Card style={{ fontSize: 13, fontWeight: 600, color: COLORS.slate }}>
@@ -643,44 +710,7 @@ function HospitalPortal({ go }) {
             </div>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div>
-              <h3>{MOCK_CITIZEN.name}</h3>
-              <div style={{ fontSize: 12, color: "#64748b" }}>Age: {MOCK_CITIZEN.age} | {MOCK_CITIZEN.bloodGroup}</div>
-              <Card style={{ marginTop: 12 }}>
-                <div style={{ fontWeight: 700, fontSize: 13 }}>AI Clinical Report Summary (Latest CBC)</div>
-                <div style={{ fontSize: 12, marginTop: 6 }}>
-                  Extracted Text Analysis: Patient shows decreased hemoglobin levels (9.2 g/dL) and low MCV.
-                </div>
-                <div style={{ background: COLORS.alert, color: COLORS.alertText, padding: 8, borderRadius: 8, marginTop: 8, fontSize: 12 }}>
-                  AI Risk Flag: Microcytic anemia indicators detected.
-                </div>
-              </Card>
-              <Card style={{ marginTop: 12 }}>
-                <div style={{ fontWeight: 700, fontSize: 13 }}>Add Clinical Notes &amp; Prescription</div>
-                <textarea rows={3} placeholder="Patient complains of fatigue. Ordering iron profile..." style={{ width: "100%", marginTop: 8, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8 }} />
-                <PrimaryButton style={{ marginTop: 8 }}>Save Record</PrimaryButton>
-              </Card>
-            </div>
-            <div>
-              <Card style={{ background: "#ecfdf5" }}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.accent }}>AI Recommendations for Doctor</div>
-                <ul style={{ fontSize: 12, marginTop: 6, paddingLeft: 18 }}>
-                  <li>Suggested Test: Iron Profile</li>
-                  <li>Suggested Test: Vitamin B12</li>
-                  <li>Trend: Hb dropped 1.5 g/dL in 6 months.</li>
-                </ul>
-              </Card>
-              <Card style={{ marginTop: 12 }}>
-                <div style={{ fontWeight: 700, fontSize: 13 }}>Patient Timeline</div>
-                {MOCK_TIMELINE.map((t, i) => (
-                  <div key={i} style={{ fontSize: 12, marginTop: 6 }}>
-                    <b>{t.when}:</b> {t.title}
-                  </div>
-                ))}
-              </Card>
-            </div>
-          </div>
+          renderPatientProfile(selectedPatient || patientProfiles[MOCK_CITIZEN.name])
         )}
       </div>
     </div>
