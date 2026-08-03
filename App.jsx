@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 /* ---------------------------------------------------------
    LIVEDIN — "One Health Identity. Lifetime Care."
    Interactive prototype covering:
-   - Citizen App (mobile frame)
+   - Citizen App (desktop browser frame)
    - Hospital Portal (desktop)
    - Government Dashboard (desktop)
    Colors match the proposal's design system exactly.
@@ -164,23 +164,42 @@ function getPinStrength(pin) {
 
 /* ---------- shared bits ---------- */
 
-function PhoneFrame({ children }) {
+function DesktopFrame({ children }) {
   return (
     <div
       style={{
-        width: 320,
-        height: 640,
-        borderRadius: 32,
-        border: `8px solid ${COLORS.slate}`,
-        background: "#fff",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 20px 45px rgba(15,23,42,0.25)",
+        width: "100%",
+        maxWidth: 1180,
         margin: "0 auto",
+        borderRadius: 24,
+        overflow: "hidden",
+        boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
+        border: `1px solid #cbd5e1`,
+        background: "#fff",
       }}
     >
-      {children}
+      <div
+        style={{
+          background: COLORS.slate,
+          color: "#fff",
+          padding: "12px 16px",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <div style={{ display: "flex", gap: 6 }}>
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#f87171" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fbbf24" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#34d399" }} />
+        </div>
+        <div style={{ flex: 1, background: "#e2e8f0", color: COLORS.slate, borderRadius: 999, padding: "6px 12px", fontSize: 12, fontWeight: 600 }}>
+          livedin.gov/demo
+        </div>
+      </div>
+      <div style={{ minHeight: 760, padding: 24, background: COLORS.bg, display: "flex", flexDirection: "column" }}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -261,6 +280,85 @@ function Card({ children, style, onClick }) {
 }
 
 const bodyFont = { fontFamily: "'Segoe UI', Arial, sans-serif" };
+
+const DESKTOP_NAV_ITEMS = [
+  { key: "overview", label: "Overview", icon: "◉", accent: true },
+  { key: "health", label: "Health ID", icon: "🪪" },
+  { key: "records", label: "Records", icon: "📄" },
+  { key: "schemes", label: "Schemes", icon: "🏛" },
+  { key: "support", label: "Support", icon: "💬" },
+];
+
+function DesktopShell({ children, screen }) {
+  const label = screen === "dashboard" ? "Overview" : screen === "records" ? "Records" : screen === "schemes" ? "Schemes" : screen === "assistant" ? "Support" : screen === "emergency" ? "Emergency" : screen === "profile" ? "Profile" : screen === "hospital" ? "Hospital" : screen === "government" ? "Government" : "Health ID";
+
+  return (
+    <div style={{ display: "flex", gap: 18, flex: 1, alignItems: "stretch" }}>
+      <div
+        style={{
+          width: 240,
+          background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)",
+          color: "#fff",
+          borderRadius: 18,
+          padding: 18,
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.4, color: "#cbd5e1" }}>LIVEDIN</div>
+          <div style={{ fontSize: 22, fontWeight: 800, marginTop: 4 }}>Citizen Console</div>
+        </div>
+        <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: 10, fontSize: 12, color: "#e2e8f0" }}>
+          Secure digital health access for every citizen.
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+          {DESKTOP_NAV_ITEMS.map((item) => {
+            const active = label === item.label;
+            return (
+              <div
+                key={item.key}
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: active ? "rgba(16, 185, 129, 0.22)" : "transparent",
+                  color: active ? "#d1fae5" : "#e2e8f0",
+                  fontWeight: active ? 700 : 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 13,
+                }}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ marginTop: "auto", background: "rgba(255,255,255,0.08)", borderRadius: 12, padding: 10 }}>
+          <div style={{ fontSize: 12, color: "#cbd5e1" }}>Current focus</div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginTop: 4 }}>{label}</div>
+        </div>
+      </div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Live demo</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.slate }}>Health identity and care journey</div>
+          </div>
+          <div style={{ background: "#ecfdf5", color: COLORS.accent, padding: "8px 10px", borderRadius: 999, fontSize: 12, fontWeight: 700 }}>
+            Secure · Verified
+          </div>
+        </div>
+        <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 18, padding: 16, flex: 1, overflow: "auto" }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const translations = {
   en: {
@@ -455,32 +553,57 @@ function getText(language, key) {
 function SplashScreen({ go, language }) {
   const t = (key) => getText(language, key);
   return (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-        gap: 12,
-        ...bodyFont,
-      }}
-    >
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16, ...bodyFont }}>
       <div
         style={{
-          width: 72,
-          height: 72,
-          borderRadius: 18,
-          background: COLORS.primary,
+          background: "linear-gradient(135deg, #e0f2fe 0%, #f8fafc 100%)",
+          border: "1px solid #bfdbfe",
+          borderRadius: 22,
+          padding: 24,
+          display: "grid",
+          gridTemplateColumns: "1.2fr 0.8fr",
+          gap: 20,
+          alignItems: "center",
         }}
-      />
-      <div style={{ fontWeight: 800, fontSize: 24, color: COLORS.slate }}>LIVEDIN</div>
-      <div style={{ color: "#64748b", textAlign: "center", fontSize: 13 }}>
-        {t("splashSubtitle")}
+      >
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: COLORS.primary }} />
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 24, color: COLORS.slate }}>LIVEDIN</div>
+              <div style={{ color: "#64748b", fontSize: 12, marginTop: 2 }}>{t("splashSubtitle")}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 16, fontSize: 14, color: "#475569", lineHeight: 1.6 }}>
+            A secure, citizen-first health identity experience for registrations, records, and care coordination.
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <PrimaryButton onClick={() => go("role")}>{t("getStarted")}</PrimaryButton>
+          </div>
+        </div>
+        <div style={{ background: "#fff", borderRadius: 16, padding: 16, border: "1px solid #e2e8f0" }}>
+          <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Live status</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: COLORS.accent, marginTop: 6 }}>24/7 access</div>
+          <div style={{ marginTop: 8, fontSize: 13, color: "#475569" }}>Connected to citizen identity, hospital updates, and government services.</div>
+          <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+            <span style={{ padding: "6px 10px", background: "#ecfdf5", color: COLORS.accent, borderRadius: 999, fontSize: 12, fontWeight: 700 }}>Secure</span>
+            <span style={{ padding: "6px 10px", background: "#eff6ff", color: COLORS.primary, borderRadius: 999, fontSize: 12, fontWeight: 700 }}>AI assisted</span>
+          </div>
+        </div>
       </div>
-      <div style={{ flex: 1 }} />
-      <PrimaryButton onClick={() => go("role")}>{t("getStarted")}</PrimaryButton>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+        {[
+          { title: "Citizens", value: "45.2M", note: "Registered" },
+          { title: "Hospitals", value: "12.4K", note: "Connected" },
+          { title: "Alerts", value: "842K", note: "Monitored" },
+        ].map((item) => (
+          <div key={item.title} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 14 }}>
+            <div style={{ fontSize: 12, color: "#64748b" }}>{item.title}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.slate, marginTop: 4 }}>{item.value}</div>
+            <div style={{ fontSize: 12, color: "#475569", marginTop: 2 }}>{item.note}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -493,15 +616,36 @@ function RoleSelect({ go, language }) {
     { id: "government", color: COLORS.purple, icon: "🏛", title: t("government"), desc: t("governmentDesc") },
   ];
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, ...bodyFont }}>
       <ScreenHeader title={t("selectRole")} onBack={() => go("splash")} />
-      <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-        {roles.map((r) => (
-          <Card key={r.id} onClick={() => go(r.id)} style={{ borderLeft: `4px solid ${r.color}` }}>
-            <div style={{ fontWeight: 700, color: r.color }}>{r.icon} {r.title}</div>
-            <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{r.desc}</div>
-          </Card>
-        ))}
+      <div style={{ padding: 16, display: "grid", gridTemplateColumns: "0.9fr 1.1fr", gap: 16 }}>
+        <div style={{ background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)", border: "1px solid #e2e8f0", borderRadius: 18, padding: 18 }}>
+          <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Choose a workspace</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: COLORS.slate, marginTop: 6 }}>Start with the right role</div>
+          <div style={{ fontSize: 13, color: "#475569", marginTop: 8, lineHeight: 1.6 }}>
+            LIVEDIN connects citizens, hospitals, and government teams in one secure digital health journey.
+          </div>
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              { label: "Health identity creation", value: "Fast and guided" },
+              { label: "Clinical updates", value: "Real-time records" },
+              { label: "Policy visibility", value: "National insights" },
+            ].map((item) => (
+              <div key={item.label} style={{ background: "#fff", padding: "10px 12px", borderRadius: 10, border: "1px solid #e2e8f0" }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: COLORS.slate }}>{item.label}</div>
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {roles.map((r) => (
+            <Card key={r.id} onClick={() => go(r.id)} style={{ borderLeft: `4px solid ${r.color}` }}>
+              <div style={{ fontWeight: 700, color: r.color }}>{r.icon} {r.title}</div>
+              <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{r.desc}</div>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -738,10 +882,11 @@ function CitizenLogin({ go, language }) {
   };
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, ...bodyFont }}>
       <ScreenHeader title={t("citizenLogin")} onBack={() => go("role")} />
-      <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-        {!isRegistering ? (
+      <div style={{ padding: 20, display: "grid", gridTemplateColumns: "1.25fr 0.75fr", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {!isRegistering ? (
           <>
             {uidGenerated && newUid && (
               <div style={{ background: "linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%)", borderRadius: 12, padding: "12px 14px", border: `1px solid ${COLORS.accent}44`, color: COLORS.slate, fontSize: 12, boxShadow: "0 8px 20px rgba(15,23,42,0.06)" }}>
@@ -1053,6 +1198,37 @@ function CitizenLogin({ go, language }) {
             </button>
           </>
         )}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)", border: "1px solid #bfdbfe", borderRadius: 16, padding: 14 }}>
+            <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Secure access</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: COLORS.slate, marginTop: 6 }}>Citizen portal overview</div>
+            <div style={{ fontSize: 13, color: "#475569", marginTop: 8, lineHeight: 1.5 }}>
+              Use your Health UID and PIN to open records, services, and care support from one trusted workspace.
+            </div>
+          </div>
+          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 14 }}>
+            <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Portal highlights</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
+              {[
+                { label: "Health ID setup", value: "Fast and guided" },
+                { label: "Care records", value: "Always available" },
+                { label: "Government services", value: "Integrated" },
+              ].map((item) => (
+                <div key={item.label} style={{ background: "#f8fafc", borderRadius: 10, padding: "10px 12px", border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.slate }}>{item.label}</div>
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 14, padding: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.slate }}>Need help?</div>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 6, lineHeight: 1.5 }}>
+              Use the demo credentials or create a new Health UID in just a few steps.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1070,40 +1246,57 @@ function Dashboard({ go, language, showWelcome, onDismissWelcome }) {
     { id: "profile", label: t("profile") },
   ];
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont, overflowY: "auto" }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, ...bodyFont, overflowY: "auto" }}>
       <ScreenHeader title={t("home")} onBack={() => go("role")} />
-      <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-        <div
-          style={{
-            background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.accent})`,
-            color: "#fff",
-            borderRadius: 12,
-            padding: 16,
-          }}
-        >
-          <div style={{ fontSize: 12, opacity: 0.85 }}>{t("healthScore")}</div>
-          <div style={{ fontSize: 32, fontWeight: 800 }}>{MOCK_CITIZEN.healthScore}/100</div>
-          <div style={{ fontSize: 12 }}>{t("goodStanding")}</div>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {items.map((it) => (
-            <Card key={it.id} onClick={() => go(it.id)} style={{ textAlign: "center", fontWeight: 700, fontSize: 13 }}>
-              {it.label}
-            </Card>
-          ))}
-        </div>
-
-        <Card>
-          <div style={{ fontWeight: 700, color: COLORS.primary, fontSize: 13 }}>{t("aiAdvice")}</div>
-          <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>
-            {t("aiAdviceNote")}
+      <div style={{ padding: 16, display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div
+            style={{
+              background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.accent})`,
+              color: "#fff",
+              borderRadius: 16,
+              padding: 18,
+              boxShadow: "0 10px 24px rgba(15,23,42,0.12)",
+            }}
+          >
+            <div style={{ fontSize: 12, opacity: 0.85 }}>{t("healthScore")}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, marginTop: 4 }}>{MOCK_CITIZEN.healthScore}/100</div>
+            <div style={{ fontSize: 12, marginTop: 4 }}>{t("goodStanding")}</div>
           </div>
-        </Card>
-        <Card>
-          <div style={{ fontWeight: 700, fontSize: 13 }}>{t("vaccinations")}</div>
-          <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>{t("vaccinationNote")}</div>
-        </Card>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {items.map((it) => (
+              <Card key={it.id} onClick={() => go(it.id)} style={{ textAlign: "center", fontWeight: 700, fontSize: 13 }}>
+                {it.label}
+              </Card>
+            ))}
+          </div>
+
+          <Card>
+            <div style={{ fontWeight: 700, color: COLORS.primary, fontSize: 13 }}>{t("aiAdvice")}</div>
+            <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>
+              {t("aiAdviceNote")}
+            </div>
+          </Card>
+          <Card>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>{t("vaccinations")}</div>
+            <div style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>{t("vaccinationNote")}</div>
+          </Card>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, padding: 14 }}>
+            <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Citizen snapshot</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.slate, marginTop: 6 }}>{MOCK_CITIZEN.name}</div>
+            <div style={{ fontSize: 13, color: "#475569", marginTop: 6 }}>UID: {MOCK_CITIZEN.uid}</div>
+            <div style={{ fontSize: 13, color: "#475569", marginTop: 2 }}>Blood group: {MOCK_CITIZEN.bloodGroup}</div>
+          </div>
+          <div style={{ background: "linear-gradient(135deg, #f8fafc 0%, #ecfeff 100%)", border: "1px solid #bae6fd", borderRadius: 16, padding: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.primary }}>Next best action</div>
+            <div style={{ fontSize: 12, color: "#475569", marginTop: 6, lineHeight: 1.5 }}>
+              Review your latest report or continue with your next care check-in from the options on the left.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1875,9 +2068,11 @@ export default function LivedinPrototype() {
   const Screen = CITIZEN_SCREENS[screen] || SplashScreen;
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", padding: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-      <PhoneFrame>
-        <Screen go={go} language={language} onLanguageToggle={handleLanguageToggle} showWelcome={showWelcome} onDismissWelcome={() => setShowWelcome(false)} />
-      </PhoneFrame>
+      <DesktopFrame>
+        <DesktopShell screen={screen}>
+          <Screen go={go} language={language} onLanguageToggle={handleLanguageToggle} showWelcome={showWelcome} onDismissWelcome={() => setShowWelcome(false)} />
+        </DesktopShell>
+      </DesktopFrame>
       <div style={{ fontSize: 11, color: "#94a3b8", ...bodyFont }}>
         LIVEDIN Prototype · Demo data only · AI never diagnoses
       </div>
