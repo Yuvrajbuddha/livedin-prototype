@@ -361,14 +361,153 @@ function CitizenLogin({ go, language }) {
   const [uid, setUid] = useState(MOCK_CITIZEN.uid);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState("");
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [voiceSupported, setVoiceSupported] = useState(true);
+  const recognitionRef = useRef(null);
   const t = (key) => getText(language, key);
 
-  const submit = () => {
-    if (pin === MOCK_CITIZEN.pin) {
+  const parseVoicePin = (transcript) => {
+    const digitsFromText = transcript.match(/\d+/g)?.join("");
+    if (digitsFromText) {
+      return digitsFromText;
+    }
+
+    const numberWords = {
+      zero: "0",
+      one: "1",
+      two: "2",
+      three: "3",
+      four: "4",
+      five: "5",
+      six: "6",
+      seven: "7",
+      eight: "8",
+      nine: "9",
+      shunya: "0",
+      ek: "1",
+      do: "2",
+      teen: "3",
+      char: "4",
+      pach: "5",
+      chah: "6",
+      sat: "7",
+      aath: "8",
+      nau: "9",
+      "चार": "4",
+      "पाँच": "5",
+      "छह": "6",
+      "सात": "7",
+      "आठ": "8",
+      "नौ": "9",
+      "तीन": "3",
+      "दो": "2",
+      "एक": "1",
+      "शून्य": "0",
+    };
+
+    const spokenWords = transcript
+      .toLowerCase()
+      .replace(/-/g, " ")
+      .split(/\s+/)
+      .filter(Boolean);
+
+    const wordDigits = spokenWords.map((word) => numberWords[word] || word).join("");
+    return wordDigits.replace(/\D/g, "");
+  };
+
+  const submit = (pinValue = pin) => {
+    if (pinValue === MOCK_CITIZEN.pin) {
       setError("");
       go("dashboard");
     } else {
       setError(t("incorrectPin"));
+    }
+  };
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setVoiceSupported(false);
+      setVoiceStatus("Voice input is not available in this browser. Using the demo PIN so the prototype still works.");
+      return undefined;
+    }
+
+    setVoiceSupported(true);
+    const recognition = new SpeechRecognition();
+    recognition.lang = language === "hi" ? "hi-IN" : "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setVoiceStatus("Listening… say your PIN, for example 4 8 2 1.");
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      setIsListening(false);
+      if (event.error === "not-allowed" || event.error === "permission-denied") {
+        setVoiceStatus("Microphone access was blocked. Please allow it and try again.");
+      } else {
+        setVoiceStatus(`Voice login unavailable: ${event.error}`);
+      }
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0].transcript)
+        .join(" ")
+        .trim();
+
+      setVoiceTranscript(transcript);
+      const parsedPin = parseVoicePin(transcript);
+
+      if (!parsedPin) {
+        setVoiceStatus("I couldn’t hear the PIN clearly. Please try again.");
+        return;
+      }
+
+      const normalizedPin = parsedPin.slice(0, 6);
+      setPin(normalizedPin);
+      setVoiceStatus(`Heard: ${transcript}`);
+
+      if (normalizedPin.length >= 4) {
+        setTimeout(() => submit(normalizedPin), 250);
+      }
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      try {
+        recognition.stop();
+      } catch (error) {
+        // Ignore cleanup errors.
+      }
+    };
+  }, [go, language]);
+
+  const startVoiceLogin = () => {
+    if (!recognitionRef.current) {
+      setPin(MOCK_CITIZEN.pin);
+      setVoiceStatus("Voice input is not available here, so the demo PIN has been filled in.");
+      submit(MOCK_CITIZEN.pin);
+      return;
+    }
+
+    try {
+      recognitionRef.current.stop();
+      recognitionRef.current.start();
+    } catch (error) {
+      setPin(MOCK_CITIZEN.pin);
+      setVoiceStatus("Voice capture could not start. The demo PIN has been applied instead.");
+      submit(MOCK_CITIZEN.pin);
     }
   };
 
@@ -392,8 +531,28 @@ function CitizenLogin({ go, language }) {
           style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
         />
         {error && <div style={{ color: COLORS.alertText, fontSize: 12 }}>{error}</div>}
-        <PrimaryButton onClick={submit}>{t("loginSecurely")}</PrimaryButton>
-        <div style={{ textAlign: "center", fontSize: 12, color: COLORS.primary }}>{t("voiceLogin")}</div>
+        <PrimaryButton onClick={() => submit()}>{t("loginSecurely")}</PrimaryButton>
+        <div style={{ fontSize: 12, color: "#64748b", textAlign: "center" }}>
+          {voiceSupported ? "Tap the mic to speak your PIN" : "Voice is unavailable, so the demo PIN is used automatically"}
+        </div>
+        <button
+          type="button"
+          onClick={startVoiceLogin}
+          disabled={isListening}
+          style={{
+            border: `1px solid ${COLORS.primary}`,
+            color: COLORS.primary,
+            background: isListening ? "#e0f2fe" : "#fff",
+            borderRadius: 10,
+            padding: "10px 12px",
+            fontWeight: 700,
+            cursor: isListening ? "default" : "pointer",
+          }}
+        >
+          {isListening ? "Listening…" : voiceSupported ? t("voiceLogin") : "Use Demo PIN"}
+        </button>
+        {voiceStatus && <div style={{ fontSize: 12, color: "#64748b" }}>{voiceStatus}</div>}
+        {voiceTranscript && <div style={{ fontSize: 12, color: COLORS.primary }}>Heard: {voiceTranscript}</div>}
       </div>
     </div>
   );
