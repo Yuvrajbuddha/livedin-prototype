@@ -688,6 +688,7 @@ function CitizenLogin({ go, language }) {
   const [rememberMe, setRememberMe] = useState(true);
   const [showForgotPin, setShowForgotPin] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [savedCitizens, setSavedCitizens] = useState(() => getStoredCitizens());
   const recognitionRef = useRef(null);
@@ -799,7 +800,8 @@ function CitizenLogin({ go, language }) {
 
     const profile = createCitizenProfile({ name: fullName, uid: newUid, pin: newPin });
     saveCitizen(profile);
-    setSavedCitizens(getStoredCitizens());
+    const nextCitizens = getStoredCitizens();
+    setSavedCitizens(nextCitizens);
     setUid(profile.uid);
     setPin(profile.pin);
     setNewUid(profile.uid);
@@ -811,7 +813,11 @@ function CitizenLogin({ go, language }) {
     setShowLoginPin(true);
     setShowNewPin(false);
     setShowConfirmPin(false);
-    setIsRegistering(false);
+    setFullName(profile.name);
+    setNewPin(profile.pin);
+    setConfirmPin(profile.pin);
+    setShowForgotPin(false);
+    setShowSuccess(true);
     go("citizenLogin");
   };
 
@@ -905,7 +911,62 @@ function CitizenLogin({ go, language }) {
       <ScreenHeader title={t("citizenLogin")} onBack={() => go("role")} />
       <div style={{ padding: 20, display: "grid", gridTemplateColumns: "1.25fr 0.75fr", gap: 16 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {!isRegistering ? (
+          {showSuccess ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ background: "linear-gradient(135deg, #ecfdf5 0%, #f8fffb 100%)", border: "1px solid #a7f3d0", borderRadius: 18, padding: 18, boxShadow: "0 16px 40px rgba(16,185,129,0.12)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: COLORS.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800 }}>
+                  ✓
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, color: COLORS.accent, fontWeight: 800, textTransform: "uppercase", letterSpacing: 1.2 }}>Welcome aboard</div>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: COLORS.slate, marginTop: 2 }}>Your Health UID is ready</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 13, color: "#475569", marginTop: 12, lineHeight: 1.6 }}>
+                Your account has been created and safely saved. You can now sign in with your Health UID and PIN whenever you need access to your records, services, or care support.
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+                <span style={{ background: "#fff", border: "1px solid #d1fae5", color: COLORS.accent, borderRadius: 999, padding: "6px 10px", fontSize: 11, fontWeight: 700 }}>Secure profile saved</span>
+                <span style={{ background: "#fff", border: "1px solid #d1fae5", color: COLORS.accent, borderRadius: 999, padding: "6px 10px", fontSize: 11, fontWeight: 700 }}>Instant sign-in</span>
+                <span style={{ background: "#fff", border: "1px solid #d1fae5", color: COLORS.accent, borderRadius: 999, padding: "6px 10px", fontSize: 11, fontWeight: 700 }}>Always available</span>
+              </div>
+            </div>
+            <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 14 }}>
+              <div style={{ fontWeight: 700, color: COLORS.slate, marginBottom: 8 }}>Your login details</div>
+              <div style={{ display: "grid", gap: 8 }}>
+                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 12px" }}>
+                  <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Health UID</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.slate, marginTop: 2 }}>{uid}</div>
+                </div>
+                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 12px" }}>
+                  <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.2 }}>Health PIN</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.slate, marginTop: 2 }}>{pin}</div>
+                </div>
+              </div>
+            </div>
+            <PrimaryButton onClick={() => {
+              setShowSuccess(false);
+              setShowOnboarding(false);
+              setIsRegistering(false);
+              setError("");
+            }}>Continue to login</PrimaryButton>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSuccess(false);
+                setShowOnboarding(false);
+                setIsRegistering(false);
+                setError("");
+                setUid("");
+                setPin("");
+              }}
+              style={{ border: "1px solid #e2e8f0", background: "#fff", color: COLORS.slate, borderRadius: 10, padding: "10px 12px", fontWeight: 700 }}
+            >
+              Create another account
+            </button>
+          </div>
+        ) : !isRegistering ? (
           <>
             {uidGenerated && newUid && (
               <div style={{ background: "linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%)", borderRadius: 12, padding: "12px 14px", border: `1px solid ${COLORS.accent}44`, color: COLORS.slate, fontSize: 12, boxShadow: "0 8px 20px rgba(15,23,42,0.06)" }}>
@@ -1086,7 +1147,11 @@ function CitizenLogin({ go, language }) {
               • Easy PIN setup<br />
               • Quick access to your health dashboard
             </div>
-            <PrimaryButton onClick={() => setIsRegistering(true)}>{t("onboardingCta")}</PrimaryButton>
+            <div style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: COLORS.slate }}>
+              <div style={{ fontWeight: 800, color: COLORS.accent, marginBottom: 4 }}>Create your account in 2 steps</div>
+              <div>Step 1: add your name and generate a Health UID. Step 2: choose a PIN and finish registration.</div>
+            </div>
+            <PrimaryButton onClick={() => setShowOnboarding(false)}>{t("onboardingCta")}</PrimaryButton>
             <button
               type="button"
               onClick={() => {
@@ -1129,8 +1194,8 @@ function CitizenLogin({ go, language }) {
             />
             <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthUid")}</label>
             <div style={{ background: "#eef8f2", borderRadius: 10, padding: "8px 10px", border: `1px solid ${COLORS.accent}33`, fontSize: 12, color: COLORS.slate }}>
-              <div style={{ fontWeight: 700, color: COLORS.accent, marginBottom: 2 }}>Create Health UID</div>
-              <div>Generate your UID below and use it as your secure health identity.</div>
+              <div style={{ fontWeight: 700, color: COLORS.accent, marginBottom: 2 }}>Step 1 · Create Health UID</div>
+              <div>Enter your name and tap Generate UID to create your secure health identity.</div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <input
@@ -1161,6 +1226,10 @@ function CitizenLogin({ go, language }) {
               </div>
             )}
             <label style={{ fontSize: 12, color: "#64748b" }}>{t("choosePin")}</label>
+            <div style={{ background: "#f8fafc", borderRadius: 10, padding: "8px 10px", border: "1px solid #e2e8f0", fontSize: 12, color: "#64748b" }}>
+              <div style={{ fontWeight: 700, color: COLORS.slate, marginBottom: 2 }}>Step 2 · Secure your account</div>
+              <div>Choose a PIN and confirm it. This PIN protects your health dashboard access.</div>
+            </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <input
                 type={showNewPin ? "text" : "password"}
@@ -1198,6 +1267,10 @@ function CitizenLogin({ go, language }) {
               </button>
             </div>
             {registerMessage && <div style={{ color: COLORS.primary, fontSize: 12 }}>{registerMessage}</div>}
+            <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: COLORS.slate }}>
+              <div style={{ fontWeight: 700, color: COLORS.primary, marginBottom: 3 }}>Ready to finish?</div>
+              <div>Once you create the account, your Health UID and PIN will be saved and available for future sign-in.</div>
+            </div>
             <PrimaryButton onClick={handleRegister}>{t("createAccount")}</PrimaryButton>
             <button
               type="button"
