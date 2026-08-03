@@ -282,14 +282,14 @@ function Card({ children, style, onClick }) {
 const bodyFont = { fontFamily: "'Segoe UI', Arial, sans-serif" };
 
 const DESKTOP_NAV_ITEMS = [
-  { key: "overview", label: "Overview", icon: "◉", accent: true },
-  { key: "health", label: "Health ID", icon: "🪪" },
-  { key: "records", label: "Records", icon: "📄" },
-  { key: "schemes", label: "Schemes", icon: "🏛" },
-  { key: "support", label: "Support", icon: "💬" },
+  { key: "overview", label: "Overview", icon: "◉", target: "dashboard" },
+  { key: "health", label: "Health ID", icon: "🪪", target: "citizenLogin" },
+  { key: "records", label: "Records", icon: "📄", target: "records" },
+  { key: "schemes", label: "Schemes", icon: "🏛", target: "schemes" },
+  { key: "support", label: "Support", icon: "💬", target: "assistant" },
 ];
 
-function DesktopShell({ children, screen }) {
+function DesktopShell({ children, screen, onNavigate }) {
   const label = screen === "dashboard" ? "Overview" : screen === "records" ? "Records" : screen === "schemes" ? "Schemes" : screen === "assistant" ? "Support" : screen === "emergency" ? "Emergency" : screen === "profile" ? "Profile" : screen === "hospital" ? "Hospital" : screen === "government" ? "Government" : "Health ID";
 
   return (
@@ -317,8 +317,10 @@ function DesktopShell({ children, screen }) {
           {DESKTOP_NAV_ITEMS.map((item) => {
             const active = label === item.label;
             return (
-              <div
+              <button
                 key={item.key}
+                type="button"
+                onClick={() => onNavigate?.(item.target)}
                 style={{
                   padding: "10px 12px",
                   borderRadius: 10,
@@ -329,11 +331,15 @@ function DesktopShell({ children, screen }) {
                   alignItems: "center",
                   gap: 8,
                   fontSize: 13,
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  width: "100%",
                 }}
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -2069,7 +2075,7 @@ export default function LivedinPrototype() {
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", padding: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
       <DesktopFrame>
-        <DesktopShell screen={screen}>
+        <DesktopShell screen={screen} onNavigate={go}>
           <Screen go={go} language={language} onLanguageToggle={handleLanguageToggle} showWelcome={showWelcome} onDismissWelcome={() => setShowWelcome(false)} />
         </DesktopShell>
       </DesktopFrame>
