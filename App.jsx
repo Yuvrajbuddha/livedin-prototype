@@ -64,6 +64,16 @@ const MOCK_SCHEMES = [
 
 export const CITIZEN_STORAGE_KEY = "livedin_citizens";
 
+function persistCitizens(citizens) {
+  if (typeof window === "undefined") {
+    return Array.isArray(citizens) ? citizens : [MOCK_CITIZEN];
+  }
+
+  const nextCitizens = Array.isArray(citizens) ? citizens.filter(Boolean) : [MOCK_CITIZEN];
+  window.localStorage.setItem(CITIZEN_STORAGE_KEY, JSON.stringify(nextCitizens));
+  return nextCitizens;
+}
+
 function normalizeUid(uid) {
   return String(uid || "").trim().toUpperCase();
 }
@@ -80,13 +90,13 @@ export function getStoredCitizens() {
   try {
     const stored = window.localStorage.getItem(CITIZEN_STORAGE_KEY);
     if (!stored) {
-      window.localStorage.setItem(CITIZEN_STORAGE_KEY, JSON.stringify([MOCK_CITIZEN]));
+      persistCitizens([MOCK_CITIZEN]);
       return [MOCK_CITIZEN];
     }
 
     const parsed = JSON.parse(stored);
     if (Array.isArray(parsed) && parsed.length) {
-      return parsed;
+      return parsed.filter(Boolean);
     }
   } catch (error) {
     console.warn("Could not read saved citizens", error);
@@ -108,7 +118,7 @@ export function saveCitizen(citizen) {
 
   const existing = getStoredCitizens().filter((entry) => normalizeUid(entry.uid) !== normalizeUid(nextCitizen.uid));
   const nextCitizens = [nextCitizen, ...existing];
-  window.localStorage.setItem(CITIZEN_STORAGE_KEY, JSON.stringify(nextCitizens));
+  persistCitizens(nextCitizens);
   return nextCitizen;
 }
 
@@ -118,7 +128,7 @@ export function deleteCitizen(uid) {
   }
 
   const nextCitizens = getStoredCitizens().filter((entry) => normalizeUid(entry.uid) !== normalizeUid(uid));
-  window.localStorage.setItem(CITIZEN_STORAGE_KEY, JSON.stringify(nextCitizens));
+  persistCitizens(nextCitizens);
   return nextCitizens;
 }
 
@@ -767,6 +777,9 @@ function CitizenLogin({ go, language }) {
         setUid(parsed.uid || "");
         setPin(parsed.pin || "");
       }
+
+      const storedCitizens = getStoredCitizens();
+      setSavedCitizens(storedCitizens);
     } catch (error) {
       console.warn("Could not restore previous login", error);
     }
@@ -985,6 +998,7 @@ function CitizenLogin({ go, language }) {
             <button
               type="button"
               onClick={() => {
+                setIsRegistering(true);
                 setShowOnboarding(true);
                 setRegisterMessage("");
               }}
