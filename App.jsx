@@ -62,6 +62,106 @@ const MOCK_SCHEMES = [
   },
 ];
 
+export const CITIZEN_STORAGE_KEY = "livedin_citizens";
+
+function normalizeUid(uid) {
+  return String(uid || "").trim().toUpperCase();
+}
+
+function normalizePin(pin) {
+  return String(pin || "").trim();
+}
+
+export function getStoredCitizens() {
+  if (typeof window === "undefined") {
+    return [MOCK_CITIZEN];
+  }
+
+  try {
+    const stored = window.localStorage.getItem(CITIZEN_STORAGE_KEY);
+    if (!stored) {
+      window.localStorage.setItem(CITIZEN_STORAGE_KEY, JSON.stringify([MOCK_CITIZEN]));
+      return [MOCK_CITIZEN];
+    }
+
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed) && parsed.length) {
+      return parsed;
+    }
+  } catch (error) {
+    console.warn("Could not read saved citizens", error);
+  }
+
+  return [MOCK_CITIZEN];
+}
+
+export function saveCitizen(citizen) {
+  if (typeof window === "undefined") {
+    return citizen;
+  }
+
+  const nextCitizen = {
+    ...citizen,
+    uid: normalizeUid(citizen.uid || `LVD-${new Date().getFullYear()}-${String(Math.floor(1000 + Math.random() * 9000))}`),
+    pin: normalizePin(citizen.pin),
+  };
+
+  const existing = getStoredCitizens().filter((entry) => normalizeUid(entry.uid) !== normalizeUid(nextCitizen.uid));
+  const nextCitizens = [nextCitizen, ...existing];
+  window.localStorage.setItem(CITIZEN_STORAGE_KEY, JSON.stringify(nextCitizens));
+  return nextCitizen;
+}
+
+export function deleteCitizen(uid) {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const nextCitizens = getStoredCitizens().filter((entry) => normalizeUid(entry.uid) !== normalizeUid(uid));
+  window.localStorage.setItem(CITIZEN_STORAGE_KEY, JSON.stringify(nextCitizens));
+  return nextCitizens;
+}
+
+export function findCitizenByUid(uid, pin) {
+  const normalizedUid = normalizeUid(uid);
+  const normalizedPin = normalizePin(pin);
+
+  return getStoredCitizens().find((citizen) => {
+    return normalizeUid(citizen.uid) === normalizedUid && normalizePin(citizen.pin) === normalizedPin;
+  });
+}
+
+export function createCitizenProfile({ name, uid, pin }) {
+  const normalizedUid = normalizeUid(uid || `LVD-${new Date().getFullYear()}-${String(Math.floor(1000 + Math.random() * 9000))}`);
+  const normalizedPin = normalizePin(pin);
+
+  return {
+    name: String(name || "New Citizen").trim(),
+    uid: normalizedUid,
+    pin: normalizedPin,
+    age: 18,
+    bloodGroup: "Not set",
+    allergies: [],
+    condition: "No major condition recorded",
+    emergencyContact: "Add contact",
+    healthScore: 80,
+  };
+}
+
+function getPinStrength(pin) {
+  const value = normalizePin(pin);
+  if (!value) {
+    return { score: 0, label: "Enter a PIN", color: "#64748b" };
+  }
+  if (value.length < 4) {
+    return { score: 1, label: "Too short", color: COLORS.alertText };
+  }
+  if (value.length < 6) {
+    return { score: 2, label: "Fair", color: "#f59e0b" };
+  }
+  return { score: 3, label: "Strong", color: COLORS.accent };
+}
+
 /* ---------- shared bits ---------- */
 
 function PhoneFrame({ children }) {
@@ -178,6 +278,30 @@ const translations = {
     healthPin: "Health PIN",
     loginSecurely: "Login securely",
     voiceLogin: "🎤 Login with Voice",
+    newUserTitle: "Create a new Health UID",
+    uidHowTitle: "How citizens create a Health UID",
+    uidHowText: "Enter your name, tap Generate UID, choose a secure PIN, and confirm it. Your Health UID becomes your personal health identity.",
+    uidHowNote: "Use this UID later to sign in to your health dashboard.",
+    fullName: "Full name",
+    choosePin: "Choose Health PIN",
+    confirmPin: "Confirm Health PIN",
+    createAccount: "Create account",
+    switchToRegister: "Create new Health UID",
+    switchToLogin: "Back to login",
+    registerSuccess: "Account created. You can now log in.",
+    registerError: "Please enter a name, a UID, and matching PINs.",
+    demoAccount: "Use demo account",
+    generateUid: "Generate UID",
+    pinHint: "Use 4 or more digits for a stronger PIN.",
+    rememberMe: "Remember me",
+    forgotPin: "Forgot PIN?",
+    forgotPinMessage: "Use the demo PIN 4821 or create a new account.",
+    onboardingTitle: "Welcome to LIVEDIN",
+    onboardingText: "Create your health profile in a few easy steps and start using your secure Health UID.",
+    onboardingCta: "Start setup",
+    welcomeBack: "Welcome back",
+    welcomeBackText: "Your health dashboard is ready.",
+    dismiss: "Dismiss",
     incorrectPin: "Incorrect PIN. Try 4821 for this demo.",
     home: "Home · 🔔 2",
     healthScore: "Health Score",
@@ -227,6 +351,7 @@ const translations = {
     languageOption: "Language / भाषा (Hindi)",
     languageOptionHi: "भाषा / Language (English)",
     profileName: "Profile",
+    signOut: "Sign out",
   },
   hi: {
     getStarted: "शुरू करें →",
@@ -243,6 +368,30 @@ const translations = {
     healthPin: "स्वास्थ्य PIN",
     loginSecurely: "सुरक्षित रूप से लॉगिन करें",
     voiceLogin: "🎤 आवाज से लॉगिन",
+    newUserTitle: "नया Health UID बनाएँ",
+    uidHowTitle: "नागरिक Health UID कैसे बनाते हैं",
+    uidHowText: "अपना नाम दर्ज करें, Generate UID पर tap करें, एक सुरक्षित PIN चुनें और उसकी पुष्टि करें। आपका Health UID आपकी व्यक्तिगत स्वास्थ्य पहचान बन जाता है।",
+    uidHowNote: "भविष्य में इस UID से अपने हेल्थ डैशबोर्ड में साइन इन करें।",
+    fullName: "पूरा नाम",
+    choosePin: "स्वास्थ्य PIN चुनें",
+    confirmPin: "PIN की पुष्टि करें",
+    createAccount: "खाता बनाएं",
+    switchToRegister: "नया Health UID बनाएँ",
+    switchToLogin: "लॉगिन पर वापस जाएँ",
+    registerSuccess: "खाता बन गया। अब आप लॉगिन कर सकते हैं।",
+    registerError: "कृपया नाम, UID और मेल खाने वाला PIN दर्ज करें।",
+    demoAccount: "डेमो अकाउंट उपयोग करें",
+    generateUid: "UID जनरेट करें",
+    pinHint: "मज़बूत PIN के लिए 4 या अधिक अंक इस्तेमाल करें।",
+    rememberMe: "मुझे याद रखें",
+    forgotPin: "PIN भूल गए?",
+    forgotPinMessage: "डेमो PIN 4821 का उपयोग करें या नया अकाउंट बनाएं।",
+    onboardingTitle: "LIVEDIN में आपका स्वागत है",
+    onboardingText: "कुछ आसान चरणों में अपना स्वास्थ्य प्रोफ़ाइल बनाएं और अपना सुरक्षित Health UID इस्तेमाल करना शुरू करें।",
+    onboardingCta: "सेटअप शुरू करें",
+    welcomeBack: "वापस स्वागत है",
+    welcomeBackText: "आपका हेल्थ डैशबोर्ड तैयार है।",
+    dismiss: "बंद करें",
     incorrectPin: "गलता PIN। इस डेमो के लिए 4821 आज़माएं।",
     home: "होम · 🔔 2",
     healthScore: "स्वास्थ्य स्कोर",
@@ -292,6 +441,7 @@ const translations = {
     languageOption: "भाषा / Language (English)",
     languageOptionHi: "Language / भाषा (Hindi)",
     profileName: "प्रोफ़ाइल",
+    signOut: "लॉग आउट",
   },
 };
 
@@ -365,8 +515,24 @@ function CitizenLogin({ go, language }) {
   const [voiceStatus, setVoiceStatus] = useState("");
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [voiceSupported, setVoiceSupported] = useState(true);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [newUid, setNewUid] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [registerMessage, setRegisterMessage] = useState("");
+  const [uidGenerated, setUidGenerated] = useState(false);
+  const [showLoginPin, setShowLoginPin] = useState(false);
+  const [showNewPin, setShowNewPin] = useState(false);
+  const [showConfirmPin, setShowConfirmPin] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [showForgotPin, setShowForgotPin] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [savedCitizens, setSavedCitizens] = useState(() => getStoredCitizens());
   const recognitionRef = useRef(null);
   const t = (key) => getText(language, key);
+  const pinStrength = getPinStrength(newPin);
 
   const parseVoicePin = (transcript) => {
     const digitsFromText = transcript.match(/\d+/g)?.join("");
@@ -418,12 +584,72 @@ function CitizenLogin({ go, language }) {
   };
 
   const submit = (pinValue = pin) => {
-    if (pinValue === MOCK_CITIZEN.pin) {
+    const citizen = findCitizenByUid(uid, pinValue);
+
+    if (citizen) {
+      if (rememberMe && typeof window !== "undefined") {
+        window.localStorage.setItem("livedin_last_login", JSON.stringify({ uid: citizen.uid, pin: citizen.pin }));
+      }
       setError("");
+      setRegisterMessage("");
+      setShowWelcome(true);
       go("dashboard");
     } else {
       setError(t("incorrectPin"));
     }
+  };
+
+  const handleDemoLogin = () => {
+    setUid(MOCK_CITIZEN.uid);
+    setPin(MOCK_CITIZEN.pin);
+    setError("");
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const lastLogin = window.localStorage.getItem("livedin_last_login");
+      if (lastLogin) {
+        const parsed = JSON.parse(lastLogin);
+        setUid(parsed.uid || "");
+        setPin(parsed.pin || "");
+      }
+    } catch (error) {
+      console.warn("Could not restore previous login", error);
+    }
+  }, []);
+
+  const handleGenerateUid = () => {
+    const generatedId = createCitizenProfile({ name: fullName || "New Citizen", uid: "", pin: newPin || "1234" }).uid;
+    setNewUid(generatedId);
+    setUidGenerated(true);
+  };
+
+  const handleRegister = () => {
+    if (!fullName.trim() || !newPin.trim() || newPin !== confirmPin) {
+      setRegisterMessage(t("registerError"));
+      return;
+    }
+
+    const profile = createCitizenProfile({ name: fullName, uid: newUid, pin: newPin });
+    saveCitizen(profile);
+    setSavedCitizens(getStoredCitizens());
+    setUid(profile.uid);
+    setPin(profile.pin);
+    setNewUid(profile.uid);
+    setUidGenerated(true);
+    setRegisterMessage(t("registerSuccess"));
+    setIsRegistering(false);
+    setShowOnboarding(false);
+    setError("");
+    setShowLoginPin(true);
+    setShowNewPin(false);
+    setShowConfirmPin(false);
+    setIsRegistering(false);
+    go("citizenLogin");
   };
 
   useEffect(() => {
@@ -515,50 +741,324 @@ function CitizenLogin({ go, language }) {
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
       <ScreenHeader title={t("citizenLogin")} onBack={() => go("role")} />
       <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 14 }}>
-        <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthUid")}</label>
-        <input
-          value={uid}
-          onChange={(e) => setUid(e.target.value)}
-          style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
-        />
-        <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthPin")}</label>
-        <input
-          type="password"
-          maxLength={6}
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-          placeholder="••••"
-          style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
-        />
-        {error && <div style={{ color: COLORS.alertText, fontSize: 12 }}>{error}</div>}
-        <PrimaryButton onClick={() => submit()}>{t("loginSecurely")}</PrimaryButton>
-        <div style={{ fontSize: 12, color: "#64748b", textAlign: "center" }}>
-          {voiceSupported ? "Tap the mic to speak your PIN" : "Voice is unavailable, so the demo PIN is used automatically"}
-        </div>
-        <button
-          type="button"
-          onClick={startVoiceLogin}
-          disabled={isListening}
-          style={{
-            border: `1px solid ${COLORS.primary}`,
-            color: COLORS.primary,
-            background: isListening ? "#e0f2fe" : "#fff",
-            borderRadius: 10,
-            padding: "10px 12px",
-            fontWeight: 700,
-            cursor: isListening ? "default" : "pointer",
-          }}
-        >
-          {isListening ? "Listening…" : voiceSupported ? t("voiceLogin") : "Use Demo PIN"}
-        </button>
-        {voiceStatus && <div style={{ fontSize: 12, color: "#64748b" }}>{voiceStatus}</div>}
-        {voiceTranscript && <div style={{ fontSize: 12, color: COLORS.primary }}>Heard: {voiceTranscript}</div>}
+        {!isRegistering ? (
+          <>
+            {uidGenerated && newUid && (
+              <div style={{ background: "linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%)", borderRadius: 12, padding: "12px 14px", border: `1px solid ${COLORS.accent}44`, color: COLORS.slate, fontSize: 12, boxShadow: "0 8px 20px rgba(15,23,42,0.06)" }}>
+                <div style={{ fontWeight: 800, color: COLORS.accent, marginBottom: 4, fontSize: 13 }}>Welcome! Your account is ready</div>
+                <div style={{ marginBottom: 10, lineHeight: 1.6 }}>Your Health UID and PIN are already filled in. Tap Login to continue.</div>
+                <button
+                  type="button"
+                  onClick={() => submit()}
+                  style={{ border: "none", background: COLORS.primary, color: "#fff", borderRadius: 8, padding: "7px 12px", fontSize: 11, cursor: "pointer", fontWeight: 700 }}
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+            <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthUid")}</label>
+            <div style={{ background: "#f8fafc", borderRadius: 10, padding: 10, border: "1px solid #e2e8f0", fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>
+              <div style={{ fontWeight: 700, color: COLORS.slate, marginBottom: 4 }}>Create your Health UID</div>
+              <div>Enter your name, choose a secure PIN, and confirm it. This UID will help you sign in to your health dashboard whenever you need access.</div>
+            </div>
+            <input
+              value={uid}
+              onChange={(e) => setUid(e.target.value)}
+              style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
+            />
+            <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthPin")}</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                type={showLoginPin ? "text" : "password"}
+                maxLength={6}
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="••••"
+                style={{ flex: 1, padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowLoginPin((prev) => !prev)}
+                style={{ border: "1px solid #e2e8f0", background: "#fff", color: COLORS.slate, borderRadius: 8, padding: "8px 10px", fontSize: 11, cursor: "pointer" }}
+              >
+                {showLoginPin ? "Hide" : "Show"}
+              </button>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 11, color: "#64748b" }}>Demo: {MOCK_CITIZEN.uid} / {MOCK_CITIZEN.pin}</div>
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                style={{ border: "none", background: COLORS.primary, color: "#fff", borderRadius: 8, padding: "4px 8px", fontSize: 10, cursor: "pointer" }}
+              >
+                {t("demoAccount")}
+              </button>
+            </div>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#64748b" }}>
+              <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe((prev) => !prev)} />
+              <span>{t("rememberMe")}</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowForgotPin((prev) => !prev)}
+              style={{ border: "none", background: "transparent", color: COLORS.primary, textAlign: "left", padding: 0, fontSize: 12, cursor: "pointer", fontWeight: 700 }}
+            >
+              {t("forgotPin")}
+            </button>
+            {showForgotPin && (
+              <div style={{ fontSize: 12, color: "#64748b", background: "#f8fafc", padding: 8, borderRadius: 8 }}>
+                {t("forgotPinMessage")}
+              </div>
+            )}
+            {error && <div style={{ color: COLORS.alertText, fontSize: 12 }}>{error}</div>}
+            <PrimaryButton onClick={() => submit()}>{t("loginSecurely")}</PrimaryButton>
+            <div style={{ fontSize: 12, color: "#64748b", textAlign: "center" }}>
+              {voiceSupported ? "Tap the mic to speak your PIN" : "Voice is unavailable, so the demo PIN is used automatically"}
+            </div>
+            <button
+              type="button"
+              onClick={startVoiceLogin}
+              disabled={isListening}
+              style={{
+                border: `1px solid ${COLORS.primary}`,
+                color: COLORS.primary,
+                background: isListening ? "#e0f2fe" : "#fff",
+                borderRadius: 10,
+                padding: "10px 12px",
+                fontWeight: 700,
+                cursor: isListening ? "default" : "pointer",
+              }}
+            >
+              {isListening ? "Listening…" : voiceSupported ? t("voiceLogin") : "Use Demo PIN"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowOnboarding(true);
+                setRegisterMessage("");
+              }}
+              style={{
+                border: "1px solid #e2e8f0",
+                color: COLORS.primary,
+                background: "#f8fafc",
+                borderRadius: 10,
+                padding: "10px 12px",
+                fontWeight: 700,
+              }}
+            >
+              {t("switchToRegister")}
+            </button>
+            {savedCitizens.length > 0 && (
+              <div style={{ marginTop: 4, padding: 10, borderRadius: 10, background: "#f8fafc" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.slate, marginBottom: 6 }}>Saved citizens</div>
+                {savedCitizens.slice(0, 4).map((citizen) => (
+                  <div
+                    key={citizen.uid}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginTop: 6,
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      background: "#fff",
+                      border: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <div style={{ fontSize: 11, color: "#64748b" }}>
+                      <div style={{ fontWeight: 700, color: COLORS.slate }}>{citizen.name}</div>
+                      <div>{citizen.uid}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUid(citizen.uid);
+                          setPin(citizen.pin || "");
+                          setError("");
+                        }}
+                        style={{ border: "none", background: COLORS.primary, color: "#fff", borderRadius: 8, padding: "4px 8px", fontSize: 10, cursor: "pointer" }}
+                      >
+                        Use
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextCitizens = deleteCitizen(citizen.uid);
+                          setSavedCitizens(nextCitizens);
+                        }}
+                        style={{ border: "none", background: "#fee2e2", color: COLORS.alertText, borderRadius: 8, padding: "4px 8px", fontSize: 10, cursor: "pointer" }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {voiceStatus && <div style={{ fontSize: 12, color: "#64748b" }}>{voiceStatus}</div>}
+            {voiceTranscript && <div style={{ fontSize: 12, color: COLORS.primary }}>Heard: {voiceTranscript}</div>}
+          </>
+        ) : showOnboarding ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ fontWeight: 800, color: COLORS.slate, fontSize: 18 }}>{t("onboardingTitle")}</div>
+            <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.6 }}>{t("onboardingText")}</div>
+            <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)", borderRadius: 12, padding: 12, fontSize: 12, color: "#64748b", border: `1px solid ${COLORS.primary}22`, boxShadow: "0 6px 18px rgba(15,23,42,0.06)" }}>
+              <div style={{ fontWeight: 800, color: COLORS.primary, marginBottom: 8, fontSize: 13 }}>{t("uidHowTitle")}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ width: 20, height: 20, borderRadius: "50%", background: COLORS.primary, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>1</span>
+                  <div>{t("uidHowText")}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ width: 20, height: 20, borderRadius: "50%", background: COLORS.accent, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>2</span>
+                  <div>{t("uidHowNote")}</div>
+                </div>
+              </div>
+            </div>
+            <div style={{ background: "#f8fafc", borderRadius: 10, padding: 12, fontSize: 12, color: "#64748b" }}>
+              • Secure Health UID<br />
+              • Easy PIN setup<br />
+              • Quick access to your health dashboard
+            </div>
+            <PrimaryButton onClick={() => setIsRegistering(true)}>{t("onboardingCta")}</PrimaryButton>
+            <button
+              type="button"
+              onClick={() => {
+                setShowOnboarding(false);
+                setIsRegistering(false);
+              }}
+              style={{
+                border: "1px solid #e2e8f0",
+                color: COLORS.slate,
+                background: "#fff",
+                borderRadius: 10,
+                padding: "10px 12px",
+                fontWeight: 700,
+              }}
+            >
+              {t("switchToLogin")}
+            </button>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontWeight: 800, color: COLORS.slate }}>{t("newUserTitle")}</div>
+            <div style={{ background: "linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)", borderRadius: 12, padding: 12, fontSize: 12, color: "#64748b", border: `1px solid ${COLORS.primary}22`, boxShadow: "0 6px 18px rgba(15,23,42,0.06)" }}>
+              <div style={{ fontWeight: 800, color: COLORS.primary, marginBottom: 8, fontSize: 13 }}>{t("uidHowTitle")}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ width: 20, height: 20, borderRadius: "50%", background: COLORS.primary, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>1</span>
+                  <div>{t("uidHowText")}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ width: 20, height: 20, borderRadius: "50%", background: COLORS.accent, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>2</span>
+                  <div>{t("uidHowNote")}</div>
+                </div>
+              </div>
+            </div>
+            <label style={{ fontSize: 12, color: "#64748b" }}>{t("fullName")}</label>
+            <input
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              style={{ padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
+            />
+            <label style={{ fontSize: 12, color: "#64748b" }}>{t("healthUid")}</label>
+            <div style={{ background: "#eef8f2", borderRadius: 10, padding: "8px 10px", border: `1px solid ${COLORS.accent}33`, fontSize: 12, color: COLORS.slate }}>
+              <div style={{ fontWeight: 700, color: COLORS.accent, marginBottom: 2 }}>Create Health UID</div>
+              <div>Generate your UID below and use it as your secure health identity.</div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                value={newUid}
+                onChange={(e) => setNewUid(e.target.value)}
+                placeholder="LVD-2026-9999"
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  border: uidGenerated && newUid ? `1px solid ${COLORS.accent}` : "1px solid #cbd5e1",
+                  borderRadius: 8,
+                  background: uidGenerated && newUid ? "#f0fdf4" : "#fff",
+                  boxShadow: uidGenerated && newUid ? "0 0 0 2px rgba(16,185,129,0.12)" : "none",
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleGenerateUid}
+                style={{ border: "none", background: COLORS.primary, color: "#fff", borderRadius: 8, padding: "0 10px", fontSize: 12, cursor: "pointer" }}
+              >
+                {t("generateUid")}
+              </button>
+            </div>
+            {uidGenerated && newUid && (
+              <div style={{ background: "linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%)", borderRadius: 10, padding: "10px 12px", border: `1px solid ${COLORS.accent}44`, color: COLORS.slate, fontSize: 12, boxShadow: "0 4px 10px rgba(16,185,129,0.08)" }}>
+                <div style={{ fontWeight: 800, color: COLORS.accent, marginBottom: 3 }}>✓ UID generated successfully</div>
+                <div>Your Health UID is ready. Continue with your PIN setup to finish creating your secure profile.</div>
+              </div>
+            )}
+            <label style={{ fontSize: 12, color: "#64748b" }}>{t("choosePin")}</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                type={showNewPin ? "text" : "password"}
+                maxLength={6}
+                value={newPin}
+                onChange={(e) => setNewPin(e.target.value)}
+                placeholder="••••"
+                style={{ flex: 1, padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPin((prev) => !prev)}
+                style={{ border: "1px solid #e2e8f0", background: "#fff", color: COLORS.slate, borderRadius: 8, padding: "8px 10px", fontSize: 11, cursor: "pointer" }}
+              >
+                {showNewPin ? "Hide" : "Show"}
+              </button>
+            </div>
+            <div style={{ fontSize: 11, color: pinStrength.color }}>{t("pinHint")} · {pinStrength.label}</div>
+            <label style={{ fontSize: 12, color: "#64748b" }}>{t("confirmPin")}</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                type={showConfirmPin ? "text" : "password"}
+                maxLength={6}
+                value={confirmPin}
+                onChange={(e) => setConfirmPin(e.target.value)}
+                placeholder="••••"
+                style={{ flex: 1, padding: 10, border: "1px solid #cbd5e1", borderRadius: 8 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPin((prev) => !prev)}
+                style={{ border: "1px solid #e2e8f0", background: "#fff", color: COLORS.slate, borderRadius: 8, padding: "8px 10px", fontSize: 11, cursor: "pointer" }}
+              >
+                {showConfirmPin ? "Hide" : "Show"}
+              </button>
+            </div>
+            {registerMessage && <div style={{ color: COLORS.primary, fontSize: 12 }}>{registerMessage}</div>}
+            <PrimaryButton onClick={handleRegister}>{t("createAccount")}</PrimaryButton>
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegistering(false);
+                setRegisterMessage("");
+              }}
+              style={{
+                border: "1px solid #e2e8f0",
+                color: COLORS.slate,
+                background: "#fff",
+                borderRadius: 10,
+                padding: "10px 12px",
+                fontWeight: 700,
+              }}
+            >
+              {t("switchToLogin")}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-function Dashboard({ go, language }) {
+function Dashboard({ go, language, showWelcome, onDismissWelcome }) {
   const t = (key) => getText(language, key);
   const items = [
     { id: "assistant", label: t("aiAssistant") },
@@ -881,6 +1381,14 @@ function EmergencyQR({ go, language }) {
 
 function Profile({ go, language, onLanguageToggle }) {
   const t = (key) => getText(language, key);
+
+  const handleSignOut = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("livedin_last_login");
+    }
+    go("role");
+  };
+
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", ...bodyFont }}>
       <ScreenHeader title={t("profileTitle")} onBack={() => go("dashboard")} />
@@ -903,6 +1411,22 @@ function Profile({ go, language, onLanguageToggle }) {
             <span>{row}</span> <span>›</span>
           </Card>
         ))}
+        <button
+          type="button"
+          onClick={handleSignOut}
+          style={{
+            marginTop: 6,
+            border: "none",
+            background: COLORS.alert,
+            color: COLORS.alertText,
+            borderRadius: 10,
+            padding: "10px 12px",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          {t("signOut")}
+        </button>
       </div>
     </div>
   );
@@ -1326,6 +1850,7 @@ const CITIZEN_SCREENS = {
 export default function LivedinPrototype() {
   const [screen, setScreen] = useState("splash");
   const [language, setLanguage] = useState("en");
+  const [showWelcome, setShowWelcome] = useState(false);
   const go = (s) => setScreen(s);
 
   const handleLanguageToggle = () => {
@@ -1351,7 +1876,7 @@ export default function LivedinPrototype() {
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", padding: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
       <PhoneFrame>
-        <Screen go={go} language={language} onLanguageToggle={handleLanguageToggle} />
+        <Screen go={go} language={language} onLanguageToggle={handleLanguageToggle} showWelcome={showWelcome} onDismissWelcome={() => setShowWelcome(false)} />
       </PhoneFrame>
       <div style={{ fontSize: 11, color: "#94a3b8", ...bodyFont }}>
         LIVEDIN Prototype · Demo data only · AI never diagnoses
